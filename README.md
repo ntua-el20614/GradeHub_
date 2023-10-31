@@ -51,4 +51,16 @@ GradeHub supports courses from the following faculties:
 An online version of this website is already running using dynamic DNS and can be accessed at the following URL:
 [GradeHub Online Version](http://gradehub.hopto.org:8800/)
 
+
+![GradeHub Langing Page](./images/landing.png)
+
+
+
+
+
+
+
+
+
+
 Enjoy managing your grades and academic journey with GradeHub!
