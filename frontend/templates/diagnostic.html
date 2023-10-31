@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student's Diagnostic</title>
+    <link rel="icon" href="../static/GHlogo.png" type="image/png">
+
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/HomePage.css">
+    <style>
+        header h1 #title {
+            text-align: center;
+            /* Center the title text */
+            margin-left: flex;
+            /* Move it to the right */
+            margin-left: 25px;
+
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 0 20px;
+            margin-left: 25px;
+        }
+    </style>
+</head>
+
+
+<body>
+    <header>
+        <h1>
+            <span id="title"><span class="bold-text">Grade</span><span class="orange-box">Hub</span></span>
+            <button id="home-button"><a href="/home">&#x1F3E0;</a></button>
+            <span id="user-greeting">Hello,<span id="student-name"></span>!</span>
+        </h1>
+    </header>
+
+    <div class="container">
+        <h1>Interactive Diagnostic for the Examination of September</h1>
+        <h2>Average current -> after changes: <span id="average_now"></span> -> <span id="average_after_changes"></span>
+        </h2>
+
+    </div>
+    <div id="course-container"></div>
+
+    <script>
+
+        // Retrieve student data from localStorage
+        try {
+            let studentData = JSON.parse(localStorage.getItem('user'));
+        } catch {
+            window.location.href = "/";
+        }
+        let studentData = JSON.parse(localStorage.getItem('user'));
+
+
+        // Update student information in the HTML
+        document.getElementById('student-name').textContent = studentData.name;
+
+        async function fetchFriends() {
+            try {
+                const response = await fetch(`http://localhost:5500/list_friends/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching students data:', error);
+                return null;
+            }
+        }
+
+
+        async function fetchConfirmation() {
+            try {
+                const response = await fetch(`http://localhost:5500/confirmation/${studentData.username}/${studentData.password}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const studentsData = await response.json();
+
+                return studentsData;
+            } catch (error) {
+                console.error('Error fetching student info:', error);
+                return null;
+            }
+        }
+        async function security() {
+            const get_me = await fetchConfirmation(studentData.username, studentData.password);
+            if (get_me[0] === undefined) {
+                window.location.href = '/'; // Redirect to '/landing'
+            }
+        }
+
+        let hasCodeExecuted = false;
+        function runOnce() {
+            if (!hasCodeExecuted) {
+                hasCodeExecuted = true;
+                security();
+            }
+        }
+        document.addEventListener("DOMContentLoaded", runOnce);
+
+        async function updateCourseGoingStatus(button, grade, new_average) {
+            // Save the grade as a data attribute on the button
+            let globals = JSON.parse(localStorage.getItem('average'));
+
+            let new_grade = (button.innerHTML);
+            if (new_grade !== "fail") {
+                new_grade = parseInt(new_grade);
+            }
+            if (grade === "X" || grade === "Fail") {
+                grade = 0;
+            }
+
+            if (new_grade !== 'fail') {
+                if (grade === 'fail' || grade < 5) {
+                    // If the grade is 'fail' or less than 5, update the pass and new_average
+                    globals.average = (globals.average * (globals.pass) + new_grade) / (globals.pass + 1);
+                    globals.pass += 1;
+
+                } else {
+                    // If the grade is greater than or equal to 5, update new_average based on the new_grade
+                    globals.average = (globals.average * globals.pass - grade + new_grade) / globals.pass;
+                }
+            }
+
+
+            // Get all buttons in the course row
+            const courseButtons = button.parentElement.querySelectorAll('button');
+
+            // Set all buttons to their default color (not green)
+            courseButtons.forEach((btn) => {
+                if (btn.style.backgroundColor == "green") {
+
+                    let old_new_value = btn.innerHTML;
+                    if (old_new_value !== "fail") {
+                        old_new_value = parseInt(old_new_value);
+                    }
+
+                    if (old_new_value != 'fail' && grade < 5) {
+
+                        globals.average = (globals.average * (globals.pass) - old_new_value) / (globals.pass - 1);
+                        globals.pass -= 1;
+                    }
+                    if (old_new_value != 'fail' && grade >= 5) {
+                        globals.average = (globals.average * (globals.pass) - Math.abs(old_new_value - parseInt(grade))) / (globals.pass);
+                    }
+
+                }
+                btn.style.backgroundColor = '';
+            });
+
+
+            // Update the local storage with the updated average and pass
+            localStorage.setItem('average', JSON.stringify({ average: globals.average, pass: globals.pass }));
+
+            // Set the clicked button to green
+            button.style.backgroundColor = 'green';
+            document.getElementById('average_after_changes').textContent = globals.average.toFixed(2);
+        }
+
+        async function myfetchCourses() {
+            try {
+                const response = await fetch(`http://localhost:5500/my_courses/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const rentsData = await response.json();
+                return rentsData;
+            } catch (error) {
+                console.error('Error fetching rent info:', error);
+                return null;
+            }
+        }
+
+
+        async function sept_specs() {
+            try {
+                const response = await fetch(`http://localhost:5500/sept_stats/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const rentsData = await response.json();
+                return rentsData;
+            } catch (error) {
+                console.error('Error fetching stats info:', error);
+                return null;
+            }
+        }
+
+
+        // Create a function to display the "zero results" table
+        function displayZeroResultsTable() {
+            const courseContainer = document.querySelector('#course-container');
+            courseContainer.innerHTML = ''; // Clear existing courses
+
+            const zeroResultsTable = document.createElement('table');
+            const zeroResultsRow = document.createElement('tr');
+            const zeroResultsCell = document.createElement('td');
+
+            // Apply CSS styles to center the message horizontally and vertically
+            zeroResultsTable.style.width = '100%'; // Make the table width 100% of its parent container
+            zeroResultsTable.style.display = 'flex';
+            zeroResultsTable.style.alignItems = 'center';
+            zeroResultsTable.style.justifyContent = 'center';
+            zeroResultsTable.style.paddingTop = '20px';
+
+            zeroResultsCell.style.backgroundColor = 'lightgreen'; // Choose your desired background color
+            zeroResultsCell.style.padding = '20px'; // Add some padding for spacing
+            zeroResultsCell.style.textAlign = 'center';
+
+
+            zeroResultsCell.textContent = 'Oh no, you have zero courses for September';
+            zeroResultsRow.appendChild(zeroResultsCell);
+            zeroResultsTable.appendChild(zeroResultsRow);
+
+            courseContainer.appendChild(zeroResultsTable);
+        }
+
+
+        async function displayCourses() {
+            const myPendCourses = await myfetchCourses();
+            const stats = await sept_specs();
+            let average = stats.average;
+            if (stats.passCount > 0) {
+                document.getElementById('average_now').textContent = average.toFixed(2);
+                let pass = stats.passCount;
+                document.getElementById('average_after_changes').textContent = average.toFixed(2);
+            } else {
+
+                document.getElementById('average_now').textContent = "NGS"
+                document.getElementById('average_after_changes').textContent = "NGS"
+
+            }
+
+            if (myPendCourses && myPendCourses.length > 0) {
+                const courseContainer = document.querySelector('.container');
+                let currentSemester = 0;
+                let new_average = average;
+                myPendCourses.forEach(async (course, index) => {
+
+                    if (course.going == 1) {
+                        if (course.semester !== currentSemester) {
+                            currentSemester = course.semester;
+
+                            // Create a heading for the semester
+                            const semesterHeading = document.createElement('h3');
+                            semesterHeading.textContent = `Semester ${currentSemester}`;
+                            courseContainer.appendChild(semesterHeading);
+
+                            // Create a table for the courses in the semester
+                            const currentTable = document.createElement('table');
+                            courseContainer.appendChild(currentTable);
+
+                            // Create table header
+                            const tableHeader = document.createElement('tr');
+                            const headers = ['Name', 'Grade', 'New Grade'];
+
+                            headers.forEach((headerText) => {
+                                const th = document.createElement('th');
+                                th.textContent = headerText;
+                                tableHeader.appendChild(th);
+                            });
+
+                            currentTable.appendChild(tableHeader);
+                        }
+
+                        // Create table row for the course
+                        const currentTable = courseContainer.lastChild;
+                        const row = document.createElement('tr');
+                        if (course.going) {
+                            row.classList.add('going');
+                        } else {
+                            row.classList.add('not-going');
+                        }
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = course.name;
+                        row.appendChild(nameCell);
+
+                        // Grade
+                        const addGradeCell = document.createElement('td');
+                        addGradeCell.classList.add('Grade');
+                        const addGrade = document.createElement('grade');
+                        addGrade.innerHTML = course.grade;
+                        addGradeCell.appendChild(addGrade);
+                        row.appendChild(addGradeCell);
+
+                        // Grade change
+                        const ButtonsChangeCell = document.createElement('td');
+                        ButtonsChangeCell.classList.add('NewGrades');
+
+                        if (course.grade < 5) {
+                            const failButton = document.createElement('button');
+                            failButton.innerHTML = 'fail'; // Tick symbol
+                            failButton.addEventListener('click', () => {
+                                updateCourseGoingStatus(failButton, course.grade, new_average);//failbutton to make it green
+                                //location.reload();
+                            });
+                            ButtonsChangeCell.appendChild(failButton);
+                        } else {
+
+                            if (course.grade == 'X' || course.grade == "Fail") {
+                                const failButton = document.createElement('button');
+                                failButton.innerHTML = 'fail'; // Tick symbol
+                                failButton.addEventListener('click', () => {
+                                    updateCourseGoingStatus(failButton, course.grade, new_average);//failbutton to make it green
+                                    //location.reload();
+                                });
+                                ButtonsChangeCell.appendChild(failButton);
+
+                            }
+                        }
+
+                        let start = 5;
+                        if (course.grade > 4) {
+                            if (course.grade != 'X') {
+                                start += course.grade - 4;
+                            }
+                            else {
+                                start = 0;
+                            }
+                        }
+                        let i;
+                        for (i = start; i <= 10; i++) {
+
+
+                            const addButton = document.createElement('button');
+                            addButton.innerHTML = i; // Tick symbol
+                            addButton.addEventListener('click', () => {
+                                updateCourseGoingStatus(addButton, course.grade, new_average);
+                                //location.reload();
+                            });
+                            ButtonsChangeCell.appendChild(addButton);
+
+
+                        }
+
+
+
+                        row.appendChild(ButtonsChangeCell);
+
+
+
+                        currentTable.appendChild(row);
+                    }
+                });
+            } else {
+                displayZeroResultsTable();
+            }
+        }
+
+        displayCourses();
+
+
+
+        // Function to fetch data and set initial values in localStorage
+        async function setInitialValues() {
+            try {
+                // Fetch the data from the URL
+                const response = await fetch(`http://localhost:5500/sept_stats/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const statsData = await response.json();
+
+                // Update the localStorage with the fetched values
+                localStorage.setItem('average', JSON.stringify({ average: statsData.average, pass: statsData.passCount }));
+            } catch (error) {
+                console.error('Error fetching stats info:', error);
+            }
+        }
+
+        // Call this function to set initial values when the page is loaded
+        setInitialValues();
+
+
+
+    </script>
+</body>
+
+</html>

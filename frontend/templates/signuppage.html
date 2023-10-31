@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Student Signup</title>
+	<link rel="icon" href="../static/GHlogo.png" type="image/png">
+
+	<meta charset="UTF-8">
+	<style>
+		/* Global Styles */
+		body {
+			background-color: #b3c1c3;
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			min-height: 100vh;
+			position: relative;
+			/* Add relative positioning to body */
+		}
+
+		.container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			margin-top: 20px;
+		}
+
+		h1 {
+			margin-top: 0;
+		}
+
+		/* Form Styles */
+		form {
+			max-width: 400px;
+			background-color: #fff;
+			padding: 20px;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		label {
+			color: #333;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+
+		input[type="text"],
+		input[type="password"],
+		input[type="date"],
+		input[type="email"],
+		select {
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			padding: 10px;
+			margin-bottom: 15px;
+			width: 90%;
+			max-width: 100%;
+		}
+
+		.button_school {
+			background-color: #4caf50;
+			color: #fff;
+			font-size: 16px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			padding: 10px 20px;
+			transition: background-color 0.3s ease;
+		}
+
+		.button_school:hover {
+			background-color: #45a049;
+		}
+
+		input[type="submit"] {
+			background-color: #008cba;
+			color: #fff;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			padding: 10px;
+			width: 100%;
+			max-width: 100%;
+			transition: background-color 0.3s ease;
+		}
+
+		input[type="submit"]:hover {
+			background-color: #007097;
+		}
+
+		/* Error Message */
+		.error-message {
+			color: #ff0000;
+			font-size: 14px;
+			margin-top: 10px;
+			text-align: center;
+		}
+
+		/* Back Button */
+		.back-button {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			/* Adjust right position to move it to the upper right corner */
+			color: #262626;
+			cursor: pointer;
+			transform: scale(1.5);
+		}
+
+		/* Columns */
+		.left-column,
+		.right-column {
+			width: 100px;
+			background-color: #333;
+			height: 100%;
+			position: fixed;
+			top: 0;
+			bottom: 0;
+		}
+
+		.left-column {
+			left: 0;
+		}
+
+		.right-column {
+			right: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="left-column"></div>
+	<div class="container">
+		<h1>Student Signup</h1>
+		<h3>Fake Accounts will be deleted<br>
+			Use your real credentials and email</h3>
+		<div class="back-button" onclick="goBack()">&laquo;</div>
+		<form>
+			<label for="username">Username:</label>
+			<input type="text" id="username" name="username" required>
+
+			<label for="password">Password:</label>
+			<input type="password" id="password" name="password" required>
+
+			<label for="user_name">Name and Surname:</label>
+			<input type="text" id="user_name" name="user_name" required>
+
+			<label for="birthday">Birthday:</label>
+			<input type="date" id="birthday" name="birthday" required>
+
+			<label for="email">Email:</label>
+			<input type="email" id="email" name="email" required>
+
+			<label for="school">School and Study:</label>
+			<select class="button_school" id="school" name="school" required>
+				<!-- Default option -->
+				<option value="">Select a school</option>
+			</select>
+			<p></p>
+			<p></p>
+			<input type="submit" id="submitButton" value="Sign Up">
+		</form>
+	</div>
+	<div class="right-column"></div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+	<script>
+		// Fetch and populate schools from the API
+		async function populateSchools() {
+			const selectElement = document.getElementById("school");
+			const schoolsData = await fetchAllSchools();
+
+			if (schoolsData) {
+				schoolsData.forEach((school) => {
+					const newOption = document.createElement("option");
+					newOption.value = school.school_id; // Use a unique identifier as the value
+					newOption.text = school.school_name;
+					selectElement.appendChild(newOption);
+				});
+			}
+		}
+
+		// Function to fetch all schools from the API
+		async function fetchAllSchools() {
+			try {
+				const response = await fetch(`http://localhost:5500/all_schools`, {
+					method: 'GET',
+					credentials: 'include', // Include cookies in the request
+				});
+				const schoolsData = await response.json();
+				return schoolsData;
+			} catch (error) {
+				console.error('Error fetching school info:', error);
+				return null;
+			}
+		}
+
+		window.addEventListener("load", populateSchools);
+
+		function goBack() {
+			window.history.back();
+		}
+
+
+		async function hashPassword(password) {
+			// Hash the password using SHA-256
+			const hashedPassword = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+			return hashedPassword;
+		}
+
+
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const submitButton = document.getElementById('submitButton');
+
+			submitButton.addEventListener('click', async (event) => {
+				event.preventDefault(); // Prevent the form from submitting normally
+
+				const username = document.getElementById('username').value;
+				const password = document.getElementById('password').value;
+				const user_name = document.getElementById('user_name').value;
+				const birthday = document.getElementById('birthday').value;
+				const email = document.getElementById('email').value;
+				const school = document.getElementById('school').value;
+
+				try {
+					// Hash the password using bcrypt
+					const hashedPassword = await hashPassword(password);
+
+					// Add user
+					const actionUrl = `http://localhost:5500/add_student/${username}/${school}/${hashedPassword}/${user_name}/${birthday}/${email}`;
+					const response = await fetch(actionUrl, {
+						method: 'GET',
+						credentials: 'include', // Include cookies in the request
+					});
+
+					if (response.ok) {
+						alert('Dear Student, you signed up successfully');
+						setTimeout(() => {
+							// Redirect to the home page
+							window.location.href = '/';
+						}, 1000);
+
+					}
+				} catch (error) {
+					alert(error);
+					console.error('Error adding user:', error);
+				}
+			});
+		});
+
+
+
+	</script>
+</body>
+
+</html>

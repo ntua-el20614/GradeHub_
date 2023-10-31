@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Home Page</title>
+    <link rel="icon" href="../static/GHlogo.png" type="image/png">
+
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/HomePage.css">
+    <style>
+        td.button-cell {
+            text-align: center;
+        }
+
+        .Grade {
+            text-align: center;
+        }
+
+
+        .going {
+            background-color: #9cff8edd;
+        }
+
+        .not-going {
+            background-color: #c2afbc60;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <span id="title"><span class="bold-text">Grade</span><span class="orange-box">Hub</span></span>
+            <button id="logout-button"><a href="/">🔒</a></button>
+            <span id="user-greeting">Hello,<span id="student-name"></span>!</span>
+        </h1>
+    </header>
+    <div class="tile">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/add_friends">Add Friends <ba id="circleContainer"></ba> </a></li>
+            <li><a href="/change_courses">Change my Courses</a></li>
+            <li><a href="/my_grades">My Grades</a></li>
+            <li><a href="/my_active_courses">My Active Courses</a></li>
+            <li><a href="/my_friends">My Friends</a></li>
+            <li><a href="/september">September</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>My plans for September</h2>
+        <h4>
+            Your Average: <span id="average"></span><br>
+            Getting a 10 on a failed course gives you: <span id="maxforfailed"></span><br>
+        </h4>
+        <h3>Run diagnostic: <input type="submit" class="button" value="September Examination Period"
+                onclick="window.location.href='diagnostic';"></h3>
+        <div id="course-container"></div>
+    </div>
+    <script>
+        // Retrieve student data from localStorage
+        try {
+            const studentData = JSON.parse(localStorage.getItem('user'));
+        } catch {
+            window.location.href = "/";
+        }
+        const studentData = JSON.parse(localStorage.getItem('user'));
+
+
+
+        // Update student information in the HTML
+        document.getElementById('student-name').textContent = studentData.name;
+
+
+
+        async function myfetchCourses() {
+            try {
+                const response = await fetch(`http://localhost:5500/my_courses/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const rentsData = await response.json();
+                return rentsData;
+            } catch (error) {
+                console.error('Error fetching rent info:', error);
+                return null;
+            }
+        }
+        async function fetchAllStudents() {
+            try {
+                const response = await fetch(`http://localhost:5500/all_students`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const rentsData = await response.json();
+                return rentsData;
+            } catch (error) {
+                console.error('Error fetching rent info:', error);
+                return null;
+            }
+        }
+        async function WhoIsGoing(CourseID) {
+            try {
+                const response = await fetch(`http://localhost:5500/students_going/${CourseID}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const rentsData = await response.json();
+                return rentsData;
+            } catch (error) {
+                console.error('Error fetching rent info:', error);
+                return null;
+            }
+        }
+
+        async function sept_specs() {
+            try {
+                const response = await fetch(`http://localhost:5500/sept_stats/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const rentsData = await response.json();
+                return rentsData;
+            } catch (error) {
+                console.error('Error fetching stats info:', error);
+                return null;
+            }
+        }
+
+        async function update() {
+            const stats = await sept_specs();
+
+            let pass = stats.passCount;
+            const initial_average = document.getElementById("average");
+            const average_for_failed = document.getElementById("maxforfailed");
+            if (stats.average != null) {
+                initial_average.innerHTML = stats.average.toFixed(3);
+                average_for_failed.innerHTML = (((stats.average * pass) + 10) / (pass + 1)).toFixed(3);
+            }
+            else {
+                initial_average.innerHTML = "NGS";
+                average_for_failed.innerHTML = "NGS";
+            }
+        }
+        update();
+
+        async function fetchConfirmation() {
+            try {
+                const response = await fetch(`http://localhost:5500/confirmation/${studentData.username}/${studentData.password}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const studentsData = await response.json();
+
+                return studentsData;
+            } catch (error) {
+                console.error('Error fetching student info:', error);
+                return null;
+            }
+        }
+        async function security() {
+            const get_me = await fetchConfirmation(studentData.username, studentData.password);
+            if (get_me[0] === undefined) {
+                window.location.href = '/'; // Redirect to '/landing'
+            }
+        }
+
+        let hasCodeExecuted = false;
+        function runOnce() {
+            if (!hasCodeExecuted) {
+                hasCodeExecuted = true;
+                security();
+            }
+        }
+        document.addEventListener("DOMContentLoaded", runOnce);
+
+
+
+        async function displayCourses() {
+            const myPendCourses = await myfetchCourses();
+            const stats = await sept_specs();
+            let average = stats.average;
+            let pass = stats.passCount;
+
+            if (myPendCourses && myPendCourses.length > 0) {
+                const courseContainer = document.querySelector('.container');
+                let currentSemester = 0;
+
+                myPendCourses.forEach(async (course, index) => {
+                    if (course.semester !== currentSemester) {
+                        currentSemester = course.semester;
+
+                        // Create a heading for the semester
+                        const semesterHeading = document.createElement('h3');
+                        semesterHeading.textContent = `Semester ${currentSemester}`;
+                        courseContainer.appendChild(semesterHeading);
+
+                        // Create a table for the courses in the semester
+                        const currentTable = document.createElement('table');
+                        courseContainer.appendChild(currentTable);
+
+                        // Create table header
+                        const tableHeader = document.createElement('tr');
+                        const headers = ['Name', 'Grade', 'Max Avg Change', 'Going', 'Not Going', 'Other Friends Going'];
+
+                        headers.forEach((headerText) => {
+                            const th = document.createElement('th');
+                            th.textContent = headerText;
+                            tableHeader.appendChild(th);
+                        });
+
+                        currentTable.appendChild(tableHeader);
+                    }
+
+                    // Create table row for the course
+                    const currentTable = courseContainer.lastChild;
+                    const row = document.createElement('tr');
+                    if (course.going) {
+                        row.classList.add('going');
+                    } else {
+                        row.classList.add('not-going');
+                    }
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = course.name;
+                    row.appendChild(nameCell);
+
+                    // Grade
+                    const addGradeCell = document.createElement('td');
+                    addGradeCell.classList.add('Grade');
+                    const addGrade = document.createElement('grade');
+                    addGrade.innerHTML = course.grade;
+                    addGradeCell.appendChild(addGrade);
+                    row.appendChild(addGradeCell);
+
+                    // Grade change
+                    const AvgChangeCell = document.createElement('td');
+                    AvgChangeCell.classList.add('Grade');
+                    const avgchange = document.createElement('avgchange');
+                    let AverageChange = 0;
+                    if (course.grade > 4) {
+                        AverageChange = ((average * pass) - course.grade + 10) / (pass);
+                        avgchange.innerHTML = AverageChange.toFixed(3);
+                    }
+                    else {
+                        if (course.grade === "X") {
+                            avgchange.innerHTML = "Pending Course"
+                        }
+                        else {
+                            avgchange.innerHTML = "Failed Course"
+                        }
+                    }
+                    AvgChangeCell.appendChild(avgchange);
+                    row.appendChild(AvgChangeCell);
+
+                    //const averageElement = document.getElementById('average');
+                    //averageElement.textContent = MyStats.average.toFixed(3);
+
+
+
+                    // Add "Add" button
+                    const addButtonCell = document.createElement('td');
+                    addButtonCell.classList.add('button-cell'); // Apply CSS class
+                    const addButton = document.createElement('button');
+                    addButton.innerHTML = '&#10004;'; // Tick symbol
+                    addButton.addEventListener('click', () => {
+                        updateCourseGoingStatus(course.course_id, 1);
+                        reload_me(getScrollPosition());
+                    });
+                    addButtonCell.appendChild(addButton);
+                    row.appendChild(addButtonCell);
+
+                    // Add "Remove" button
+                    const removeButtonCell = document.createElement('td');
+                    removeButtonCell.classList.add('button-cell'); // Apply CSS class
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'X';
+                    removeButton.addEventListener('click', () => {
+                        updateCourseGoingStatus(course.course_id, 0);
+                        reload_me(getScrollPosition());
+                    });
+                    removeButtonCell.appendChild(removeButton);
+                    row.appendChild(removeButtonCell);
+
+                    // Show other people going
+                    const showButtonCell = document.createElement('td');
+                    showButtonCell.classList.add('button-cell'); // Apply CSS class
+                    const peopleCount = document.createElement('span');
+                    const showButton = document.createElement('button');
+                    showButton.textContent = 'Show';
+                    showButton.addEventListener('click', (event) => {
+                        toggleStudentNames(event, course.course_id);
+                    });
+                    showButtonCell.appendChild(showButton);
+                    showButtonCell.appendChild(peopleCount);
+                    row.appendChild(showButtonCell);
+
+                    currentTable.appendChild(row);
+                });
+            } else {
+                displayZeroResultsTable();
+            }
+        }
+
+
+        async function updateCourseGoingStatus(courseId, goingStatus) {
+            try {
+                const response = await fetch(`http://localhost:5500/change_going/${studentData.student_id}/${courseId}/${goingStatus}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                // Handle the response as needed
+                console.log('Course pending status updated successfully!');
+            } catch (error) {
+                console.error('Error updating course pending status:', error);
+                console.log(`http://localhost:5500/change_going/${studentData.student_id}/${courseId}/${goingStatus}`);
+            }
+        }
+        async function ShowOtherStudents(event, courseId) {
+            const otherPeopleGoing = await WhoIsGoing(courseId);
+            const allStudents = await fetchAllStudents();
+
+            const studentIds = otherPeopleGoing.map(student => student.student_id);
+            const otherStudents = allStudents.filter(student => studentIds.includes(student.student_id));
+            const studentNames = otherStudents.map(student => student.name);
+
+            const showButtonCell = event.target.parentNode;
+            const peopleCount = showButtonCell.querySelector('span');
+            const nameList = document.createElement('ul');
+            nameList.classList.add('student-names');
+
+            if (studentNames.length === 0) {
+                peopleCount.textContent = 'No one';
+                // Hide the "Show" button
+                const showButton = showButtonCell.querySelector('button');
+                showButton.style.display = 'none';
+            } else {
+                peopleCount.textContent = `${studentNames.length} ${studentNames.length === 1 ? 'person' : 'people'}`;
+
+                studentNames.forEach(name => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = name;
+                    nameList.appendChild(listItem);
+                });
+
+                // Remove existing names if any
+                const existingNameList = showButtonCell.querySelector('ul.student-names');
+                if (existingNameList) {
+                    showButtonCell.removeChild(existingNameList);
+                }
+
+                showButtonCell.appendChild(nameList);
+            }
+        }
+
+        async function toggleStudentNames(event, courseId) {
+            const showButton = event.target;
+            const showButtonCell = showButton.parentNode;
+            const nameList = showButtonCell.querySelector('ul.student-names');
+
+            if (nameList) {
+                // Names are already shown, so hide them and change the button text to "Show"
+                showButton.textContent = 'Show';
+                showButtonCell.removeChild(nameList);
+            } else {
+                // Names are hidden, so show them and change the button text to "Hide"
+                const otherPeopleGoing = await WhoIsGoing(courseId);
+                const allStudents = await fetchAllStudents();
+                const friends = await fetchFriends(); // Fetch friend data
+
+
+                const studentIds = otherPeopleGoing.map(student => student.student_id);
+                const otherStudents = allStudents.filter(student => studentIds.includes(student.student_id));
+                // Filter out only friends with "approved" status
+                const approvedFriends = friends.filter(friend => friend.status === 'approved');
+
+                // Get an array of student_ids for approved friends
+                const approvedFriendIds = approvedFriends.map(friend => {
+                    if (friend.sender_id === studentData.student_id) {
+                        return friend.receiver_id;
+                    }
+                    return friend.sender_id;
+                });
+                const otherFriends = allStudents.filter(student => (approvedFriendIds.includes(student.student_id) && studentIds.includes(student.student_id)));
+                const friendNames = otherFriends.map(student => student.name);
+
+                if (friendNames.length === 0) {
+                    // No names to display, hide the button
+                    showButton.style.display = 'none';
+                    return;
+                }
+
+                const nameList = document.createElement('ul');
+                nameList.classList.add('student-names');
+
+                friendNames.forEach(name => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = name;
+                    nameList.appendChild(listItem);
+                });
+
+                showButton.textContent = 'Hide';
+                showButtonCell.appendChild(nameList);
+            }
+        }
+        displayCourses();
+
+        // Create a function to display the "zero results" table
+        function displayZeroResultsTable() {
+            const courseContainer = document.querySelector('#course-container');
+            courseContainer.innerHTML = ''; // Clear existing courses
+
+            const zeroResultsTable = document.createElement('table');
+            const zeroResultsRow = document.createElement('tr');
+            const zeroResultsCell = document.createElement('td');
+
+
+            // Apply CSS styles to center the message horizontally and vertically
+            zeroResultsTable.style.width = '100%'; // Make the table width 100% of its parent container
+            zeroResultsTable.style.display = 'flex';
+            zeroResultsTable.style.alignItems = 'center';
+            zeroResultsTable.style.justifyContent = 'center';
+            zeroResultsTable.style.paddingTop = '20px';
+
+            zeroResultsCell.style.backgroundColor = 'lightgreen'; // Choose your desired background color
+            zeroResultsCell.style.padding = '20px'; // Add some padding for spacing
+            zeroResultsCell.style.textAlign = 'center';
+
+
+            zeroResultsCell.textContent = 'Oh no, you have zero active courses';
+            zeroResultsRow.appendChild(zeroResultsCell);
+            zeroResultsTable.appendChild(zeroResultsRow);
+
+            courseContainer.appendChild(zeroResultsTable);
+        }
+
+
+        async function fetchFriends() {
+            try {
+                const response = await fetch(`http://localhost:5500/list_friends/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching students data:', error);
+                return null;
+            }
+        }
+        // Display pending friend requests
+        async function HowManyPending() {
+            const friendsData = await fetchFriends();
+            let counter = 0;
+            if (friendsData) {
+
+                friendsData.forEach(friend => {
+                    if (friend.status === 'pending' && friend.receiver_id === studentData.student_id) {
+                        counter += 1;
+                    }
+                });
+            }
+            return counter;
+        }
+        async function HowManyPendingCircle() {
+            const NumPending = await HowManyPending();
+            if (NumPending != 0) {
+                const circleElement = document.createElement('ba');
+                circleElement.classList.add('circle');
+                circleElement.innerText = NumPending;
+                const containerElement = document.getElementById('circleContainer');
+                containerElement.appendChild(circleElement);
+            }
+            else {
+                const containerElement = document.getElementById('circleContainer');
+                containerElement.innerHTML = ''; // Clear the container if NumPending is zero
+                return; // Exit the function  }
+            }
+        }
+        HowManyPendingCircle();
+
+
+
+        function getScrollPosition() {
+            return {
+                x: window.scrollX || window.pageXOffset,
+                y: window.scrollY || window.pageYOffset
+            };
+        }
+        function reload_me(positions) {
+            localStorage.setItem("location_changecourses", JSON.stringify(positions));
+            location.reload();
+        }
+        function scrollToPosition(x, y) {
+            setTimeout(function () {
+                window.scrollTo(x, y);
+            }, 200); // 500 milliseconds (0.5 seconds) delay
+        }
+        const location_return = JSON.parse(localStorage.getItem('location_changecourses'));
+        scrollToPosition(location_return.x, location_return.y);
+
+    </script>
+</body>
+
+</html>

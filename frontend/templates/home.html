@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Student Home Page</title>
+  <link rel="icon" href="../static/GHlogo.png" type="image/png">
+
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/static/css/HomePage.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+  <style>
+    .password-container {
+      display: inline-flex;
+      align-items: center;
+      flex-grow: 1;
+    }
+
+    #student-password {
+      background-color: rgba(158, 255, 141, 0.8);
+      outline: none;
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1.5px solid #000000;
+    }
+
+    td {
+      background-color: #f7e7f1;
+    }
+
+    .student-info {
+      margin: 20px auto;
+      max-width: 400px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 20px;
+      background-color: rgba(158, 255, 141, 0.4);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .student-info .profile-item {
+      margin-bottom: 10px;
+    }
+
+    .student-info label {
+      font-weight: bold;
+      display: inline-block;
+      width: 120px;
+      color: #000000;
+    }
+
+    .student-info span {
+      color: #000000;
+    }
+
+
+    .hidden {
+      display: none;
+    }
+
+    #clear_button {
+      margin-bottom: 100px;
+    }
+
+    div#chart {
+      background: #ffffff;
+      border-image-slice: 1;
+      border-radius: 25px;
+      margin-bottom: 20px;
+    }
+
+
+    div#semester_chart {
+      background: #ffffff;
+      border-image-slice: 1;
+      border-radius: 25px;
+      margin-bottom: 20px;
+    }
+
+
+    /* Style for the container div */
+    #important {
+      margin-top: 20px;
+    }
+
+    /* Style for the links */
+    b {
+      display: block;
+      margin: 10px 0;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      width: fit-content;
+      /* Use 'fit-content' to match width to content */
+
+      margin-right: 10px;
+      margin-left: 10px;
+
+    }
+
+    b:hover {
+      cursor: pointer;
+
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>
+      <span id="title"><span class="bold-text">Grade</span><span class="orange-box">Hub</span></span>
+
+      <button id="logout-button"><a id="logout-link" href="/">🔒</a></button>
+      <span id="user-greeting">Hello,<span id="student-name"></span>!</span>
+    </h1>
+  </header>
+  <div class="tile">
+    <ul>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/add_friends">Add Friends <ba id="circleContainer"></ba> </a></li>
+      <li><a href="/change_courses">Change my Courses</a></li>
+      <li><a href="/my_grades">My Grades</a></li>
+      <li><a href="/my_active_courses">My Active Courses</a></li>
+      <li><a href="/my_friends">My Friends</a></li>
+      <li><a href="/september">September</a></li>
+
+    </ul>
+  </div>
+
+  <div class="container">
+    <h2>My Details</h2>
+    <div class="student-info">
+      <div class="profile-item">
+        <label>Student ID:</label>
+        <span id="student-id"></span>
+      </div>
+      <div class="profile-item">
+        <label>Username:</label>
+        <span id="student-username"></span>
+      </div>
+      <div class="profile-item">
+        <label>Birthday:</label>
+        <span id="student-birthday"></span>
+      </div>
+      <div class="profile-item">
+        <label>Email:</label>
+        <span id="student-email"></span><br>
+
+      </div>
+
+
+      <div class="profile-item">
+        <label>Change Password:</label>
+        <div id="password-container" class="password-container">
+          <input type="password" id="student-password" oninput="toggleTickButton()">
+          <button class="edit-button" id="tick-button" style="display: none;" onclick="changePassword()">
+            <i class="fas fa-check edit-icon"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+    <h4>
+      Show my Courses and Failed courses to my friends:
+      <button class="privacy" onclick="changePrivacy_and_colors(1)">Yes</button>
+      <button class="privacy" onclick="changePrivacy_and_colors(0)">No</button>
+    </h4>
+    <div id="important">
+      <h2>Important Links</h2>
+    </div>
+    <h2>My Statistics</h2>
+    <table>
+      <tr>
+        <th>Category</th>
+        <th>My Values</th>
+      </tr>
+      <tr>
+        <td>Average:</td>
+        <td><span id="average"></span></td>
+      </tr>
+      <tr>
+        <td>Passed Courses:</td>
+        <td><span id="passed"></span></td>
+      </tr>
+      <tr>
+        <td>Failed Courses:</td>
+        <td><span id="failed"></span></td>
+      </tr>
+      <tr>
+        <td>Pending Courses:</td>
+        <td><span id="pending"></span></td>
+      </tr>
+      <tr>
+        <td>Total Courses:</td>
+        <td><span id="total"></span></td>
+      </tr>
+    </table>
+
+
+
+    <h2>My Grades</h2>
+    <div id="chart"></div>
+    <h2>My Average Per Semester</h2>
+    <div id="semester_chart"></div>
+
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.26.3"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+
+  <script>
+
+    // Retrieve student data from localStorage
+    try {
+      let studentData = JSON.parse(localStorage.getItem('user'));
+    } catch {
+      window.location.href = "/";
+    }
+    let studentData = JSON.parse(localStorage.getItem('user'));
+    if (studentData.student_id == 1) {
+      window.location.href = "/home_admin"
+    }
+
+
+    async function fetchConfirmation() {
+      try {
+        const response = await fetch(`http://localhost:5500/confirmation/${studentData.username}/${studentData.password}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const studentsData = await response.json();
+
+        return studentsData;
+      } catch (error) {
+        console.error('Error fetching student info:', error);
+        return null;
+      }
+    }
+    async function security() {
+      const get_me = await fetchConfirmation(studentData.username, studentData.password);
+      if (get_me[0] === undefined) {
+        window.location.href = '/'; // Redirect to '/landing'
+      }
+    }
+
+    let hasCodeExecuted = false;
+    function runOnce() {
+      if (!hasCodeExecuted) {
+        hasCodeExecuted = true;
+        security();
+      }
+    }
+    document.addEventListener("DOMContentLoaded", runOnce);
+
+    async function fetchStats(id) {
+      try {
+        const response = await fetch(`http://localhost:5500/stats/${id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        } else {
+          console.error('Error fetching stats data:', response.status, response.statusText);
+          return null;
+        }
+      } catch (error) {
+        console.error('Error fetching stats data:', error);
+        return null;
+      }
+    }
+
+
+    async function fetchSchoolStats(id) {
+      try {
+        const response = await fetch(`http://localhost:5500/schools_info/${id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching stats data:', error);
+        return null;
+      }
+    }
+
+
+    async function fetchSemesterStats(id) {
+      try {
+        const response = await fetch(`http://localhost:5500/semester_stats/${id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching stats data:', error);
+        return null;
+      }
+    }
+
+
+    async function changePrivacy(pr) {
+      try {
+        const response = await fetch(`http://localhost:5500/change_privacy/${pr}/${studentData.student_id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        return null;
+      }
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get the button and link elements
+      const logoutButton = document.getElementById("logout-button");
+      const logoutLink = document.getElementById("logout-link");
+
+      // Your condition
+      if (studentData.student_id == 1) {
+        logoutLink.href = "/home_admin";
+      } else {
+        logoutLink.href = "/";
+      }
+
+      // Optional: Add a click event listener to the button
+      logoutButton.addEventListener("click", function () {
+        // Handle button click logic here, if needed
+      });
+    });
+    // Update student information in the HTML
+    document.getElementById('student-name').textContent = studentData.name;
+    document.getElementById('student-id').textContent = studentData.student_id;
+    document.getElementById('student-username').textContent = studentData.username;
+    document.getElementById('student-email').textContent = studentData.email;
+
+    const birthdayElement = document.getElementById('student-birthday');
+    const userBirthday = new Date(studentData.birthday);
+    userBirthday.setDate(userBirthday.getDate() + 1);
+    const birthday = userBirthday.toISOString().split("T")[0];
+    birthdayElement.textContent = birthday;
+
+
+    async function update() {
+      const MyStats = await fetchStats(studentData.student_id);
+      if (MyStats.average != null) {
+        const averageElement = document.getElementById('average');
+        averageElement.textContent = MyStats.average.toFixed(3);
+
+        document.getElementById('passed').textContent = MyStats.passCount;
+        document.getElementById('failed').textContent = MyStats.failCount;
+        document.getElementById('pending').textContent = MyStats.coursesX;
+        document.getElementById('total').textContent = MyStats.passCount + MyStats.failCount + MyStats.coursesX;
+      } else {
+        const averageElement = document.getElementById('average');
+        averageElement.textContent = "No Grades were submitted"
+
+        document.getElementById('passed').textContent = "No Grades were submitted";
+        document.getElementById('failed').textContent = "No Grades were submitted";
+        document.getElementById('pending').textContent = "No Grades were submitted";
+        document.getElementById('total').textContent = "No Grades were submitted";
+
+      }
+      var elements = document.getElementsByClassName('compare-values');
+      for (var i = 0; i < elements.length; i++) {
+        elements[i].classList.add('hidden');
+      }
+
+      var buttons = document.getElementsByClassName("privacy");
+      for (var i = 0; i < buttons.length; i++) {
+        if (studentData.privacy == 1) {
+          buttons[i].style.backgroundColor = i === 0 ? "green" : ""; // Change color for "Yes" button only
+        } else {
+          buttons[i].style.backgroundColor = i === 1 ? "red" : ""; // Change color for "No" button only
+        }
+      }
+    }
+
+    update();
+
+
+    async function changePrivacy_and_colors(value) {
+      const response = await changePrivacy(value);
+      studentData.privacy = value;
+
+      var buttons = document.getElementsByClassName("privacy");
+      for (var i = 0; i < buttons.length; i++) {
+        if (studentData.privacy == 1) {
+          buttons[i].style.backgroundColor = i === 0 ? "green" : ""; // Change color for "Yes" button only
+        } else {
+          buttons[i].style.backgroundColor = i === 1 ? "red" : ""; // Change color for "No" button only
+        }
+      }
+      localStorage.setItem("user", JSON.stringify(studentData));
+      location.reload();
+    }
+
+
+    function toggleTickButton() {
+      const passwordElement = document.getElementById("student-password");
+      const tickButton = document.getElementById("tick-button");
+      tickButton.style.display = passwordElement.value.trim() ? "block" : "none";
+    }
+
+
+    async function hashPassword(password) {
+      // Hash the password using SHA-256
+      const hashedPassword = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+      return hashedPassword;
+    }
+
+
+    async function changePassword() {
+      const passwordElement = document.getElementById("student-password");
+      const newPassword = passwordElement.value.trim();
+
+      if (newPassword !== "") {
+        const hashedPassword = await hashPassword(newPassword);
+        const changePassURL = `http://localhost:5500/change_password/${hashedPassword}/${studentData.student_id}`;
+
+        try {
+          const response = await fetch(changePassURL, {
+            method: 'GET',
+            credentials: 'include', // Include cookies in the request
+          });
+          if (response.ok) {
+            studentData.password = hashedPassword;
+            localStorage.setItem("user", JSON.stringify(studentData));
+            document.cookie = `user=${JSON.stringify(studentData)}`;
+
+            location.reload();
+          } else {
+            console.log("Could not change password");
+          }
+        } catch (error) {
+          console.log("An error occurred:", error);
+        }
+      } else {
+        console.log("New password is empty");
+      }
+    }
+
+
+
+    async function fill_links() {
+      let info = await fetchSchoolStats(studentData.school);
+      info = info[0];
+
+      var link1 = document.createElement("b");
+      link1.textContent = "Οδηγός Σπουδών";
+      link1.href = info.link_odigos_spoudwn;
+
+      var link2 = document.createElement("b");
+      link2.textContent = "Ωρολόγιο Πρόγραμμα";
+      link2.href = info.link_gia_programma;
+
+      var link3 = document.createElement("b");
+      link3.textContent = "Λινκ Σχολής";
+      link3.href = info.link_mathimata_sxolis;
+
+      var important_container = document.getElementById("important");
+
+      // Create a div container for the buttons and set its display property
+      var buttonContainer = document.createElement("div");
+      buttonContainer.style.display = "flex"; // Use flex to display buttons in the same line
+
+      buttonContainer.appendChild(link1);
+      buttonContainer.appendChild(link2);
+      buttonContainer.appendChild(link3);
+
+      important_container.appendChild(buttonContainer);
+
+      // Add event listeners to make the buttons open links in a new window
+      link1.addEventListener("click", function (e) {
+        e.preventDefault(); // Prevent the default link behavior
+        window.open(link1.href, '_blank');
+      });
+
+      link2.addEventListener("click", function (e) {
+        e.preventDefault(); // Prevent the default link behavior
+        window.open(link2.href, '_blank');
+      });
+
+      link3.addEventListener("click", function (e) {
+        e.preventDefault(); // Prevent the default link behavior
+        window.open(link3.href, '_blank');
+      });
+    }
+
+    fill_links();
+
+
+    let chart = null;
+    // Generate bar chart
+    async function generateChart(otherbool, id) {
+      try {
+
+        const coursesResponse = await fetch(`http://localhost:5500/students_courses/${studentData.student_id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const coursesData = await coursesResponse.json();
+
+        // Filter out grades that are not numbers and less than 5
+        const filteredGrades = coursesData.filter(course => !isNaN(course.grade) && parseFloat(course.grade) >= 5);
+
+        // Count the frequency of each grade
+        const gradeFrequency = filteredGrades.reduce((frequency, course) => {
+          const grade = parseFloat(course.grade);
+          frequency[grade] = (frequency[grade] || 0) + 1;
+          return frequency;
+        }, {});
+
+        let categories = Object.keys(gradeFrequency);
+        let values = Object.values(gradeFrequency);
+
+
+        // Combine categories and values into an array of objects
+        const data = categories.map((category, index) => ({ category, value: values[index] }));
+
+        // Sort the data array based on the category values
+        data.sort((a, b) => parseFloat(a.category) - parseFloat(b.category));
+        const sortedCategories = data.map(item => item.category);
+        const sortedValues = data.map(item => item.value);
+
+        categories = sortedCategories;
+        values = sortedValues;
+        const chartOptions = {
+          chart: {
+            type: 'bar',
+            height: 350,
+            width: '100%',
+            toolbar: {
+              show: false
+            }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: true,
+              dataLabels: {
+                position: 'top',
+              },
+            }
+          },
+          dataLabels: {
+            enabled: false,
+            formatter: function (val) {
+              return val;
+            },
+            offsetY: -20,
+            style: {
+              fontSize: '12px',
+              colors: ['#000000']
+            }
+          },
+          series: [{
+            name: 'Frequency',
+            data: values
+          }],
+          xaxis: {
+
+            title: {
+              text: 'Amount', // Y-axis label
+            },
+            categories: sortedCategories
+          },
+          yaxis: {
+            labels: {
+              style: {
+                colors: '#000000'
+              }
+            },
+
+            title: {
+              text: 'Grade', // Y-axis label
+            }
+          },
+          colors: "#4a8c40",
+          background: '#ffffff',
+          grid: {
+            borderColor: '#838383',
+            strokeDashArray: 4,
+            yaxis: {
+              lines: {
+                show: true
+              }
+            },
+            xaxis: {
+              lines: {
+                show: true
+              },
+
+            }
+          }
+        };
+        if (chart) {
+          chart.destroy(); // Destroy the previous chart instance if it exists
+        }
+
+        chart = new ApexCharts(document.querySelector("#chart"), chartOptions);
+        chart.render();
+
+      } catch (error) {
+        console.error('Error fetching grades data:', error);
+      }
+    }
+
+    generateChart(false, 0);
+
+
+    let semesterChart = null;
+
+    function minimum(a, b) {
+      if (a > b) { return b; }
+      return a;
+    }
+
+    // Generate semester bar chart
+    async function generateSemesterChart(studentId) {
+      try {
+        const semesterData = await fetchSemesterStats(studentId);
+
+        if (!semesterData) {
+          // Handle error or no data available
+          return;
+        }
+
+        // Extract data from the JSON response and convert it to the correct format
+        const categories = semesterData.map(item => Object.keys(item)[0]);
+        const values = semesterData.map(item => parseFloat(Object.values(item)[0]).toFixed(3));
+
+
+        // Calculate the minimum and maximum values in the data
+        const minDataValue = Math.min(...values);
+        const maxDataValue = Math.max(...values);
+
+
+        const chartOptions = {
+          chart: {
+            type: 'bar',
+            height: 350,
+            width: '100%',
+            toolbar: {
+              show: false,
+            },
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false, // Vertical bar chart
+              dataLabels: {
+                position: 'top',
+              },
+            },
+          },
+          dataLabels: {
+            enabled: false,
+            formatter: function (val) {
+              return val;
+            },
+            offsetY: -20,
+            style: {
+              fontSize: '12px',
+              colors: ['#000000'],
+            },
+          },
+          series: [
+            {
+              name: 'Average',
+              data: values,
+            },
+          ],
+          xaxis: {
+            categories: categories,
+
+            title: {
+              text: 'Semester', // Y-axis label
+            }
+          },
+          yaxis: {
+            labels: {
+              style: {
+                colors: '#000000',
+              },
+            },
+            min: minDataValue - 0.5, // Minimum value on the vertical axis
+            max: minimum(maxDataValue + 0.5, 10), // Maximum value on the vertical axis
+
+            title: {
+              text: 'Average', // Y-axis label
+            },
+          },
+          colors: "#4a8c40",
+          background: '#ffffff',
+          grid: {
+            borderColor: '#838383',
+            strokeDashArray: 4,
+            yaxis: {
+              lines: {
+                show: true,
+              },
+            },
+            xaxis: {
+              lines: {
+                show: true,
+              },
+
+            },
+          },
+        };
+
+        if (semesterChart) {
+          semesterChart.destroy(); // Destroy the previous chart instance if it exists
+        }
+
+        semesterChart = new ApexCharts(document.querySelector("#semester_chart"), chartOptions);
+        semesterChart.render();
+      } catch (error) {
+        console.error('Error fetching semester grades data:', error);
+      }
+    }
+
+
+    generateSemesterChart(studentData.student_id); // Replace 123 with the appropriate student ID
+
+
+    async function fetchFriends() {
+      try {
+        const response = await fetch(`http://localhost:5500/list_friends/${studentData.student_id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching students data:', error);
+        return null;
+      }
+    }
+
+    // Display pending friend requests
+    async function HowManyPending() {
+      const friendsData = await fetchFriends();
+      let counter = 0;
+      if (friendsData) {
+
+        friendsData.forEach(friend => {
+          if (friend.status === 'pending' && friend.receiver_id === studentData.student_id) {
+            counter += 1;
+          }
+        });
+      }
+      return counter;
+    }
+    async function HowManyPendingCircle() {
+      const NumPending = await HowManyPending();
+      if (NumPending != 0) {
+        const circleElement = document.createElement('ba');
+        circleElement.classList.add('circle');
+        circleElement.innerText = NumPending;
+        const containerElement = document.getElementById('circleContainer');
+        containerElement.appendChild(circleElement);
+      }
+      else {
+        const containerElement = document.getElementById('circleContainer');
+        containerElement.innerHTML = ''; // Clear the container if NumPending is zero
+        return; // Exit the function  }
+      }
+    }
+    HowManyPendingCircle();
+
+  </script>
+</body>
+
+</html>
