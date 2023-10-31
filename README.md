@@ -53,6 +53,18 @@ An online version of this website is already running using dynamic DNS and can b
 
 
 ![GradeHub Langing Page](./images/landing.png)
+![GradeHub Home Page](./images/homepage.png)
+
+![GradeHub Change Courses Page](./images/change_courses.png)
+![GradeHub My Grades Page](./images/my_grades.png)
+
+![GradeHub Admin Page](./images/admin.png)
+![GradeHub Add Friends Page](./images/add_friends.png)
+![GradeHub My Friends Page](./images/my_friends.png)
+
+
+![GradeHub September Page](./images/september.png)
+![GradeHub Diagnostic Page](./images/diagnostic.png)
 
 
 
