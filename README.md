@@ -12,11 +12,11 @@ Welcome to GradeHub, a web application that allows you to manage and track your 
 
 - **Home Page:** Displays your semester averages and grade charts.
 - Shows pending, failed, and passed courses.
-- Set courses as 'X' for future enrollment.
-- Add friends and view their course plans.
-- See which courses your friends plan to take during the September examination period.
-- Calculate how your GPA will change with the "diagnostic" button.
-- "Active Courses" tab shows only the courses you've signed up for this academic year.
+- **My Grades:** Set the grade as 'X' for future enrollment.
+- **Friends:** Add friends and view their course plans (you are not allowed to see their grades nor their average score).
+- **September:** See which exams your friends plan to take during the September examination period.
+- Calculate how your average will change with the "diagnostic" button.
+- **Active Courses** tab shows only the courses you've signed up for this academic year.
 
 ## Supported Faculties
 
@@ -28,7 +28,7 @@ GradeHub supports courses from the following faculties:
 
 ## Admin Panel
 
-- The admin has access to user emails and passwords (not their grades).
+- The admin has access to user emails and encrypted passwords (not their grades).
 - The admin is the first user (User ID = 1).
 - Can reset any user's password in case they forget it.
 - Access to the last login time of each user.
@@ -44,6 +44,7 @@ GradeHub supports courses from the following faculties:
 - Routing implemented in Python.
 - Backend developed in JavaScript (Node.js).
 - Frontend created using HTML and JavaScript.
+- Cookies are used to prevent any user from accessing the wrong API
 
 ## Online Version
 
@@ -51,7 +52,3 @@ An online version of this website is already running using dynamic DNS and can b
 [GradeHub Online Version](http://gradehub.hopto.org:8800/)
 
 Enjoy managing your grades and academic journey with GradeHub!
-
----
-
-Feel free to provide additional details or formatting to this README as needed for your repository.
