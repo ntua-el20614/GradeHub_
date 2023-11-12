@@ -13,7 +13,7 @@ body {
     background-repeat: no-repeat;
     background-size: 100%;
     background-position: center center;
-  }
+}
 
 .welcome-message {
     background-color: #333;
@@ -28,7 +28,8 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    overflow: auto; /* Enable scrolling within the container */
+    overflow: auto;
+    /* Enable scrolling within the container */
 }
 
 .rectangle {
@@ -117,16 +118,16 @@ footer a:hover {
 
 
 
-.orange-box {
+.blue-box {
     display: inline-block;
-    background-color: rgb(231, 150, 0);
+    background-color: #0056b3;
     color: black;
     padding: 3px 6px;
     border-radius: 15%;
     font-weight: bold;
     margin-left: 5px;
-  }
-  
-  .bold-text {
+}
+
+.bold-text {
     font-weight: bold;
-  }
+}

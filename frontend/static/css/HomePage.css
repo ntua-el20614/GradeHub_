@@ -319,14 +319,21 @@ table {
   line-height: 15px;
 }
 
-.orange-box {
+.blue-box {
   display: inline-block;
-  background-color: rgb(231, 150, 0);
+  background-color: #0056b3;
   color: black;
   padding: 3px 6px;
   border-radius: 15%;
   font-weight: bold;
   margin-left: 5px;
+}
+
+.tile li img {
+  width: auto; 
+  height: 150px; 
+  display: block; 
+  margin: 0 auto; 
 }
 
 .bold-text {

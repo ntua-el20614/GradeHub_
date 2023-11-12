@@ -52,7 +52,7 @@
 <body>
   <header>
     <h1>
-      <span id="title"><span class="bold-text">Grade</span><span class="orange-box">Hub</span></span>
+      <span id="title"><span class="blue-box">Grade</span><span class="bold-text"> Hub </span></span>
       <button id="logout-button"><a href="/">🔒</a></button>
       <span id="user-greeting">Hello,<span id="student-name"></span>!</span>
     </h1>
@@ -66,6 +66,7 @@
       <li><a href="/my_active_courses">My Active Courses</a></li>
       <li><a href="/my_friends">My Friends</a></li>
       <li><a href="/september">September</a></li>
+      <li><img src="../static/GHlogo.png" alt="GradeHub_Logo"></li>
     </ul>
   </div>
 
@@ -79,7 +80,7 @@
     <br>
 
     <div id="state-buttons">
-      Κατάσταση: Επιλογή φίλτρων (Τουλαχιστον ένα)
+      Κατάσταση: Επιλογή φίλτρων
       <p></p>
       <button class="state-button" data-state="1">My Courses</button>
       <button class="state-button" data-state="2">My Old Courses</button>
@@ -331,7 +332,8 @@
 
         localStorage.setItem('selectedFlows', JSON.stringify(selectedFlows));
         localStorage.setItem('selectedSemesters', JSON.stringify(selectedSemesters));
-        localStorage.setItem('selectedStates', JSON.stringify(selectedStates));
+        localStorage.setItem('selectedStates_grades', JSON.stringify(selectedStates));
+
         filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
       });
     });
@@ -357,9 +359,10 @@
         const selectedFlows = Array.from(document.querySelectorAll('.flow-button.selected')).map((btn) => btn.getAttribute('data-flow'));
         const selectedStates = Array.from(document.querySelectorAll('.state-button.selected')).map((btn) => btn.getAttribute('data-state'));
 
+
         localStorage.setItem('selectedFlows', JSON.stringify(selectedFlows));
         localStorage.setItem('selectedSemesters', JSON.stringify(selectedSemesters));
-        localStorage.setItem('selectedStates', JSON.stringify(selectedStates));
+        localStorage.setItem('selectedStates_grades', JSON.stringify(selectedStates));
         filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
       });
     });
@@ -376,14 +379,17 @@
           button.classList.add('selected');
         }
 
+
+
         // Get all selected flows
         const selectedStates = Array.from(stateButtons).filter((btn) => btn.classList.contains('selected')).map((btn) => btn.getAttribute('data-state'));
         const selectedSemesters = Array.from(document.querySelectorAll('.semester-button.selected')).map((btn) => btn.getAttribute('data-semester'));
         const selectedFlows = Array.from(document.querySelectorAll('.flow-button.selected')).map((btn) => btn.getAttribute('data-flow'));
 
+
         localStorage.setItem('selectedFlows', JSON.stringify(selectedFlows));
         localStorage.setItem('selectedSemesters', JSON.stringify(selectedSemesters));
-        localStorage.setItem('selectedStates', JSON.stringify(selectedStates));
+        localStorage.setItem('selectedStates_grades', JSON.stringify(selectedStates));
         filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
       });
     });
@@ -403,7 +409,7 @@
 
     // Function to get saved selected semesters from localStorage
     function getSavedSelectedStates() {
-      const savedSelectedStates = localStorage.getItem('selectedStates');
+      const savedSelectedStates = localStorage.getItem('selectedStates_grades');
       return savedSelectedStates ? JSON.parse(savedSelectedStates) : [];
     }
 
@@ -418,33 +424,55 @@
     const savedSelectedSemesters = getSavedSelectedSemesters();
     const savedSelectedStates = getSavedSelectedStates();
 
-    if (savedSelectedStates == 0) {
-      displayZeroResultsTable();
-      //reload_me(getScrollPosition());
+
+    if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 0 && savedSelectedStates == 0) {
+      filterCoursesBySemesterFlowState([], [], [1, 2, 3, 4]);
     }
     else {
-      if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 0) {
+      if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 0 && savedSelectedStates == 1) {
         filterCoursesBySemesterFlowState([], [], savedSelectedStates);
 
       }
       else {
-        if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 1) {
-          filterCoursesBySemesterFlowState([], savedSelectedFlows, savedSelectedStates);
+        if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 1 && savedSelectedStates == 0) {
+          filterCoursesBySemesterFlowState([], savedSelectedFlows, [1, 2, 3, 4]);
+
         }
         else {
-          if (savedSelectedSemesters.length == 1 && savedSelectedFlows.length == 0 && savedSelectedStates == 1) {
-            filterCoursesBySemesterFlowState(savedSelectedSemesters, [], savedSelectedStates);
-
+          if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 1 && savedSelectedStates == 1) {
+            filterCoursesBySemesterFlowState([], savedSelectedFlows, savedSelectedStates);
           }
           else {
 
-            filterCoursesBySemesterFlowState(savedSelectedSemesters, savedSelectedFlows, savedSelectedStates);
+            if (savedSelectedSemesters.length == 1 && savedSelectedFlows.length == 0 && savedSelectedStates == 0) {
+              filterCoursesBySemesterFlowState(savedSelectedSemesters, [], [1, 2, 3, 4]);
+
+            }
+            else {
+
+              if (savedSelectedSemesters.length == 1 && savedSelectedFlows.length == 0 && savedSelectedStates == 1) {
+                filterCoursesBySemesterFlowState(savedSelectedSemesters, [], savedSelectedStates);
+
+              }
+              else {
+
+                if (savedSelectedSemesters.length == 1 && savedSelectedFlows.length == 1 && savedSelectedStates == 0) {
+                  filterCoursesBySemesterFlowState(savedSelectedSemesters, savedSelectedFlows, [1, 2, 3, 4]);
+
+                }
+                else {
+                  filterCoursesBySemesterFlowState(savedSelectedSemesters, savedSelectedFlows, savedSelectedStates);
 
 
+                }
+              }
+            }
           }
+
         }
       }
     }
+
 
     if (savedSelectedFlows.length > 0) {
       savedSelectedFlows.forEach((flow) => {
@@ -481,11 +509,20 @@
         const selectedFlows = Array.from(document.querySelectorAll('.flow-button.selected')).map((btn) => btn.getAttribute('data-flow'));
         const selectedStates = Array.from(document.querySelectorAll('.state-button.selected')).map((btn) => btn.getAttribute('data-state'));
 
-        if (studentData.school == 1 || studentData.school == 3 || studentData.school == 4)
-          filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
-        else
-          filterCoursesBySemesterFlowState(selectedSemesters, [], selectedStates);
+        if (studentData.school == 1 || studentData.school == 3 || studentData.school == 4) {
+          if (selectedStates.length === 0)
+            filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, [1, 2, 3, 4]);
+          else
+            filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
 
+        }
+        else {
+          if (selectedStates.length === 0)
+            filterCoursesBySemesterFlowState(selectedSemesters, [], [1, 2, 3, 4]);
+          else
+            filterCoursesBySemesterFlowState(selectedSemesters, [], selectedStates);
+
+        }
       });
     });
 
@@ -522,7 +559,13 @@
     async function filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates) {
 
       let restriction = true;
-      const courses = await fetchCourses(selectedSemesters, selectedFlows, selectedStates);
+      let states_corrected;
+      if (selectedStates.length === 0) {
+        states_corrected = [1, 2, 3, 4]
+      } else {
+        states_corrected = selectedStates
+      }
+      const courses = await fetchCourses(selectedSemesters, selectedFlows, states_corrected);
       if (courses && courses.length > 0) {
         const courseContainer = document.querySelector('#course-container');
         courseContainer.innerHTML = ''; // Clear existing courses

@@ -26,7 +26,7 @@
 
 <body>
   <div class="welcome-message">
-    Welcome to <span class="bold-text">Grade</span><span class="orange-box">Hub</span> -- version 1.4
+    Welcome to <span class="blue-box">Grade</span><span class="bold-text"> Hub </span> -- version 1.4
   </div>
 
 
@@ -65,8 +65,9 @@
 
   <footer>
     <p class="copyrights">
-      <span class="bold-text">Grade</span><span class="orange-box">Hub</span> Database &copy; 2023. All rights
+      <span class="blue-box">Grade</span><span class="bold-text"> Hub </span> Database &copy; 2023. All rights
       reserved.<br>
+      Last Backup: 09-11-2023 22:15
     </p>
   </footer>
 
@@ -116,7 +117,7 @@
         localStorage.setItem("user", JSON.stringify(student));
         document.cookie = `user=${JSON.stringify(student)}`;
         const nothing_really = await changeLastLogin(student.student_id);
-        if (student.student_id == 1)
+        if (student.student_id == 1 || student.student_id == 2)
           window.location.href = '/home_admin';
         else
           window.location.href = '/home';
