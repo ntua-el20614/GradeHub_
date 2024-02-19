@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Home Page</title>
+    <link rel="icon" href="../static/GHlogo.png" type="image/png">
+
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/HomePage.css">
+
+    <style>
+        .container {
+            max-width: auto !important;
+            margin: auto;
+            padding: 0 20px;
+            margin-left: 250px !important;
+        }
+
+        /* Style for the semester cell */
+        .semester-cell {
+            background-color: #76ca67aa;
+            font-weight: bold;
+            text-align: center;
+            /* header */
+        }
+
+        .my-pend-course-row {
+            background-color: #9cff8e50;
+            /* Ta mathimata pou einai xreomenos/i sto ak eksamino */
+        }
+
+        tbody tr:nth-child(even) {
+            /* Teleiwmena mathimata */
+            background-color: #f7e7f199;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #f7e7f199;
+        }
+
+        td.button-cell {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <span id="title"><span class="blue-box">Grade</span><span class="bold-text"> Hub </span></span>
+            <button id="logout-button"><a href="/">🔒</a></button>
+            <span id="user-greeting">Hello, <span id="student-name"></span>!</span>
+        </h1>
+    </header>
+    <div class="tile">
+        <ul>
+            <li><img src="../static/GHlogo.png" alt="GradeHub_Logo"></li>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/add_friends">Add Friends <ba id="circleContainer"></ba> </a></li>
+            <li><a href="/change_courses">Change my Courses</a></li>
+            <li><a href="/my_grades">My Grades</a></li>
+            <li><a href="/my_active_courses">My Active Courses</a></li>
+            <li><a href="/my_friends">My Friends</a></li>
+            <li><a href="/september">September</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>My friends</h2>
+        <table id="friendTable" class="display">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Courses</th>
+                    <th>Remove Friend</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table rows will be dynamically generated using JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Retrieve student data from localStorage
+        try {
+            let studentData = JSON.parse(localStorage.getItem('user'));
+        } catch {
+            window.location.href = "/";
+        }
+        let studentData = JSON.parse(localStorage.getItem('user'));
+
+
+        // Update student information in the HTML
+        document.getElementById('student-name').textContent = studentData.name;
+
+        async function fetchFriends() {
+            try {
+                const response = await fetch(`http://localhost:5500/list_friends/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching students data:', error);
+                return null;
+            }
+        }
+        async function fetchCourses(id) {
+            try {
+                const response = await fetch(`http://localhost:5500/friends_courses/${id}/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching course data:', error);
+                return null;
+            }
+        }
+
+
+        async function fetchPendCourses(id) {
+            try {
+                const response = await fetch(`http://localhost:5500/friends_pending_courses/${id}/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching course data:', error);
+                return null;
+            }
+        }
+
+
+        async function fetchPrivacy(id) {
+            try {
+                const response = await fetch(`http://localhost:5500/privacy/${id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching course data:', error);
+                return null;
+            }
+        }
+
+        async function return_privacy(id) {
+            const info = await fetchPrivacy(id);
+            if (info[0].privacy == 1) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
+
+
+        async function fetchConfirmation() {
+            try {
+                const response = await fetch(`http://localhost:5500/confirmation/${studentData.username}/${studentData.password}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const studentsData = await response.json();
+
+                return studentsData;
+            } catch (error) {
+                console.error('Error fetching student info:', error);
+                return null;
+            }
+        }
+        async function security() {
+            const get_me = await fetchConfirmation(studentData.username, studentData.password);
+            if (get_me[0] === undefined) {
+                window.location.href = '/'; // Redirect to '/landing'
+            }
+        }
+
+        let hasCodeExecuted = false;
+        function runOnce() {
+            if (!hasCodeExecuted) {
+                hasCodeExecuted = true;
+                security();
+            }
+        }
+        document.addEventListener("DOMContentLoaded", runOnce);
+
+
+
+
+
+        async function deleteFriendShip(id) {
+            try {
+                const response = await fetch(`http://localhost:5500/delete_friendship/${id}/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                // Handle the response as needed
+                location.reload();
+            } catch (error) {
+                console.error('Error deleting friendship:', error);
+            }
+        }
+
+        async function displayFriends() {
+            const friendsData = await fetchFriends();
+            let friendless = true;
+
+            if (friendsData) {
+                const table = document.getElementById('friendTable');
+                table.classList.add('default-course-movi');
+                friendsData.forEach(async friend => {
+                    if (friend.status === 'approved' && (friend.receiver_id === studentData.student_id || friend.sender_id === studentData.student_id)) {
+                        friendless = false;
+                        const newRow = table.insertRow();
+                        const nameCell = newRow.insertCell(0);
+                        const expandCell = newRow.insertCell(1);
+                        const deleteCell = newRow.insertCell(2);
+
+                        nameCell.textContent = friend.sender_name === studentData.name ? friend.receiver_name : friend.sender_name;
+                        const id_of_friend = friend.sender_name === studentData.name ? friend.receiver_id : friend.sender_id;
+
+                        const privacy = await return_privacy(id_of_friend);
+
+                        if (privacy) {
+
+                            const expandButton = document.createElement('button');
+                            expandButton.textContent = '▼';
+                            expandButton.addEventListener('click', async () => {
+                                const coursesData = await fetchCourses(friend.sender_id === studentData.student_id ? friend.receiver_id : friend.sender_id);
+                                const coursesInfo = await fetchPendCourses(friend.sender_id === studentData.student_id ? friend.receiver_id : friend.sender_id);
+
+                                if (coursesData) {
+                                    const courseTable = document.createElement('table');
+                                    courseTable.classList.add('display');
+
+                                    const thead = document.createElement('thead');
+                                    const tr = document.createElement('tr');
+
+
+                                    thead.appendChild(tr);
+                                    courseTable.appendChild(thead);
+
+                                    const tbody = document.createElement('tbody');
+                                    let currentSemester = -1;
+                                    coursesData.forEach(course => {
+                                        if (course.semester !== currentSemester) {
+                                            currentSemester = course.semester;
+                                            const semesterRow = document.createElement('tr');
+                                            const semesterCell = document.createElement('td');
+                                            semesterCell.colSpan = 2;
+                                            semesterCell.textContent = `Semester ${currentSemester}`;
+                                            semesterCell.classList.add('semester-cell');
+                                            semesterRow.appendChild(semesterCell);
+                                            tbody.appendChild(semesterRow);
+                                        }
+
+                                        const courseRow = document.createElement('tr');
+                                        const td1 = document.createElement('td');
+                                        td1.textContent = course.name;
+                                        const existsInMyPendCourses = coursesInfo.some((courseInfo) => courseInfo.course_id === course.course_id);
+                                        if (existsInMyPendCourses) {
+                                            td1.classList.add('my-pend-course-row');
+                                        }
+
+                                        courseRow.appendChild(td1);
+
+                                        tbody.appendChild(courseRow);
+                                    });
+
+                                    courseTable.appendChild(tbody);
+
+                                    const collapseButton = document.createElement('button');
+                                    collapseButton.textContent = '▲';
+                                    collapseButton.addEventListener('click', () => {
+                                        courseTable.parentNode.removeChild(courseTable);
+                                        expandCell.removeChild(collapseButton);
+                                        expandCell.appendChild(expandButton);
+                                    });
+
+                                    expandCell.innerHTML = '';
+                                    expandCell.appendChild(courseTable);
+                                    expandCell.appendChild(collapseButton);
+                                }
+                            });
+
+                            expandCell.appendChild(expandButton);
+
+
+
+                        } else {
+
+                            expandCell.textContent = "This friend doesn't want to share their courses";
+                        }
+                        // Add "Remove" button 
+                        const removeButton = document.createElement('button');
+                        removeButton.textContent = 'X';
+                        removeButton.addEventListener('click', () => {
+                            deleteFriendShip(friend.friendship_id);
+                        });
+                        deleteCell.appendChild(removeButton);
+
+
+
+                    }
+
+                });
+                if (friendless) {
+
+                    let newRow = document.createElement('td');
+
+                    newRow = table.insertRow();
+
+                    const friendless = newRow.insertCell(0);
+                    friendless.colSpan = 3;
+
+                    friendless.textContent = "Woah! Such empty!";
+
+
+                }
+            }
+        }
+
+        displayFriends();
+
+        // Display pending friend requests
+        async function HowManyPending() {
+            const friendsData = await fetchFriends();
+            let counter = 0;
+            if (friendsData) {
+
+                friendsData.forEach(friend => {
+                    if (friend.status === 'pending' && friend.receiver_id === studentData.student_id) {
+                        counter += 1;
+                    }
+                });
+            }
+            return counter;
+        }
+        async function HowManyPendingCircle() {
+            const NumPending = await HowManyPending();
+            if (NumPending != 0) {
+                const circleElement = document.createElement('ba');
+                circleElement.classList.add('circle');
+                circleElement.innerText = NumPending;
+                const containerElement = document.getElementById('circleContainer');
+                containerElement.appendChild(circleElement);
+            }
+            else {
+                const containerElement = document.getElementById('circleContainer');
+                containerElement.innerHTML = ''; // Clear the container if NumPending is zero
+                return; // Exit the function  }
+            }
+        }
+        HowManyPendingCircle();
+
+
+
+
+
+    </script>
+</body>
+
+</html>

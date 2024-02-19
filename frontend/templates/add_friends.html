@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Home Page</title>
+    <link rel="icon" href="../static/GHlogo.png" type="image/png">
+
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/HomePage.css">
+    <style>
+        .container {
+            max-width: auto !important;
+            margin: auto;
+            padding: 0 20px;
+            margin-left: 250px !important;
+        }
+
+        /* Custom row color */
+        .custom-row-color {
+            background-color: orange;
+        }
+
+        /* Centered buttons */
+        .centered-button {
+            text-align: center;
+        }
+    </style>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <span id="title"><span class="blue-box">Grade</span><span class="bold-text"> Hub </span></span>
+            <button id="logout-button"><a href="/">🔒</a></button>
+            <span id="user-greeting">Hello, <span id="student-name"></span>!</span>
+        </h1>
+    </header>
+
+    <div class="tile">
+        <ul>
+            <li><img src="../static/GHlogo.png" alt="GradeHub_Logo"></li>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/add_friends">Add Friends <ba id="circleContainer"></ba> </a></li>
+            <li><a href="/change_courses">Change my Courses</a></li>
+            <li><a href="/my_grades">My Grades</a></li>
+            <li><a href="/my_active_courses">My Active Courses</a></li>
+            <li><a href="/my_friends">My Friends</a></li>
+            <li><a href="/september">September</a></li>
+
+        </ul>
+    </div>
+
+    <div class="container mt-5">
+        <h1>Pending Friend Requests</h1>
+        <table class="table" id="myTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Accept</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table body content will be added dynamically -->
+            </tbody>
+        </table>
+        <br><br>
+        <br><br>
+        <h1>Add Friends</h1>
+        <table class="table2" id="myTable2">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Send Friend Request</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table body content will be added dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Retrieve student data from localStorage
+        try {
+            let studentData = JSON.parse(localStorage.getItem('user'));
+        } catch {
+            window.location.href = "/";
+        }
+        let studentData = JSON.parse(localStorage.getItem('user'));
+
+
+        // Update student information in the HTML
+        document.getElementById('student-name').textContent = studentData.name;
+
+
+
+        async function fetchConfirmation() {
+            try {
+                const response = await fetch(`http://localhost:5500/confirmation/${studentData.username}/${studentData.password}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const studentsData = await response.json();
+
+                return studentsData;
+            } catch (error) {
+                console.error('Error fetching student info:', error);
+                return null;
+            }
+        }
+        async function security() {
+            const get_me = await fetchConfirmation(studentData.username, studentData.password);
+            if (get_me[0] === undefined) {
+                window.location.href = '/'; // Redirect to '/landing'
+            }
+        }
+
+        let hasCodeExecuted = false;
+        function runOnce() {
+            if (!hasCodeExecuted) {
+                hasCodeExecuted = true;
+                security();
+            }
+        }
+        document.addEventListener("DOMContentLoaded", runOnce);
+
+
+
+
+        async function fetchStuds() {
+            try {
+                const response = await fetch(`http://localhost:5500/all_students_friends`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching students data:', error);
+                return null;
+            }
+        }
+
+
+        async function handleFriendRequest(id, action) {
+            try {
+                const response = await fetch(`http://localhost:5500/change_friendship_status/${id}/${action}/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                if (response.ok) {
+                    reload_me(getScrollPosition());
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
+
+        // Display pending friend requests
+        async function displayPendingFriends() {
+            const friendsData = await fetchFriends();
+            let bucket = [];
+
+            if (friendsData) {
+                friendsData.forEach(friend => {
+                    if (friend.status === 'pending' && friend.receiver_id === studentData.student_id) {
+                        let current = { "Name": friend.sender_name, "friendship_id": friend.friendship_id };
+                        bucket.push(current); // Use push to add the current object to the array
+                    }
+                });
+            }
+            return bucket;
+        }
+
+
+
+        // Define an async function
+        async function initializeTable() {
+            // Sample data for the table
+            const data = await displayPendingFriends();
+
+            // Initialize DataTable
+            var table = $('#myTable').DataTable({
+                data: data,
+                columns: [
+                    { data: 'Name' },
+                    {
+                        name: "Accept",
+                        defaultContent: '<button class="approve-button">Accept</button>' // Add a button to each row
+                    },
+                    {
+                        name: "Delete",
+                        defaultContent: '<button class="delete-button">Delete</button>' // Add a button to each row
+                    }
+                ],
+                searching: true, // Enable search bar
+                paging: true, // Enable pagination
+                pageLength: 5 // Number of rows per page
+
+            });//    
+
+            // Add click event listener to the buttons
+
+            $('#myTable tbody').on('click', 'button.approve-button', function () {
+                var id = table.row($(this).parents('tr')).data().friendship_id;
+                handleFriendRequest(id, "approved");
+            });
+            $('#myTable tbody').on('click', 'button.delete-button', function () {
+                var id = table.row($(this).parents('tr')).data().friendship_id;
+                deleteFriendShip(id);
+            });
+
+        }
+
+
+
+        async function deleteFriendShip(id) {
+            try {
+                const response = await fetch(`http://localhost:5500/delete_friendship/${id}/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                // Handle the response as needed
+                reload_me(getScrollPosition());
+            } catch (error) {
+                console.error('Error deleting friendship:', error);
+            }
+        }
+
+
+        async function handlerFriendRequest(id) {
+            try {
+                const response = await fetch(`http://localhost:5500/add_friend/${studentData.student_id}/${id}/pending`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                if (response.ok) {
+
+                    reload_me(getScrollPosition());
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
+
+        async function isit(student) {
+            const friends = await fetchFriends();
+            let found = true;
+            friends.forEach(student_new => {
+                if (student_new.receiver_id == student.student_id || student_new.sender_id == student.student_id) {
+                    if (student.student_id != studentData.student_id)
+                        found = false;
+                }
+            })
+            return found;
+        }
+        // Display all students
+        async function displayAllStudents() {
+            const studentsData = await fetchStuds();
+            let bucket = [];
+
+            if (studentsData) {
+                await Promise.all(studentsData.map(async (student) => {
+                    const result = await isit(student);
+
+                    if (student.student_id !== studentData.student_id && result) {
+                        let current = { "Name": student.name, "student_id": student.student_id }
+                        bucket.push(current);
+                    }
+                }));
+            }
+
+            return bucket;
+        }
+
+
+
+        // Initialize DataTable for myTable2
+
+        async function initializeTable2() {
+            const data = await displayAllStudents();
+
+            // Initialize DataTable for myTable2
+            var table2 = $('#myTable2').DataTable({
+                data: data,
+                columns: [
+                    { data: 'Name' },
+                    {
+                        name: "Send",
+                        defaultContent: '<button class="approve-button">Send Friend Request</button>' // Add a button to each row
+                    }
+                ],
+                searching: true, // Enable search bar
+                paging: true, // Enable pagination
+                pageLength: 5 // Number of rows per page
+            });
+
+            // Add click event listener to the buttons
+            $('#myTable2 tbody').on('click', 'button.approve-button', function () {
+                var id = table2.row($(this).parents('tr')).data().student_id;
+                handlerFriendRequest(id);
+            });
+        }
+
+        // Call both initialize functions when the document is ready
+        $(document).ready(async function () {
+            await initializeTable();
+            await initializeTable2();
+        });
+
+
+
+
+        async function fetchFriends() {
+            try {
+                const response = await fetch(`http://localhost:5500/list_friends/${studentData.student_id}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies in the request
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching students data:', error);
+                return null;
+            }
+        }
+
+        // Display pending friend requests
+        async function HowManyPending() {
+            const friendsData = await fetchFriends();
+            let counter = 0;
+            if (friendsData) {
+
+                friendsData.forEach(friend => {
+                    if (friend.status === 'pending' && friend.receiver_id === studentData.student_id) {
+                        counter += 1;
+                    }
+                });
+            }
+            return counter;
+        }
+        async function HowManyPendingCircle() {
+            const NumPending = await HowManyPending();
+            if (NumPending != 0) {
+                const circleElement = document.createElement('div');
+                circleElement.classList.add('circle');
+                circleElement.innerText = NumPending;
+                const containerElement = document.getElementById('circleContainer');
+                containerElement.appendChild(circleElement);
+            }
+            else {
+                const containerElement = document.getElementById('circleContainer');
+                containerElement.innerHTML = ''; // Clear the container if NumPending is zero
+                return; // Exit the function  }
+            }
+        }
+        HowManyPendingCircle();
+
+
+        function getScrollPosition() {
+            return {
+                x: window.scrollX || window.pageXOffset,
+                y: window.scrollY || window.pageYOffset
+            };
+        }
+        function reload_me(positions) {
+            localStorage.setItem("location_changecourses", JSON.stringify(positions));
+            location.reload();
+        }
+        function scrollToPosition(x, y) {
+            setTimeout(function () {
+                window.scrollTo(x, y);
+            }, 200); // 500 milliseconds (0.5 seconds) delay
+        }
+        const location_return = JSON.parse(localStorage.getItem('location_changecourses'));
+        scrollToPosition(location_return.x, location_return.y);
+
+
+
+
+    </script>
+</body>
+
+</html>

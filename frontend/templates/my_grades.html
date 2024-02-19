@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Student Home Page</title>
+  <link rel="icon" href="../static/GHlogo.png" type="image/png">
+
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/static/css/HomePage.css">
+  <style>
+    .flow-button {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* Style for pressed flow buttons */
+    .flow-button.selected {
+      background-color: #007bff;
+      /* Change to your preferred color */
+      color: #fff;
+      /* Text color for pressed buttons */
+    }
+
+    .semester-button {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* Style for pressed flow buttons */
+    .semester-button.selected {
+      background-color: #00ff11;
+      /* Change to your preferred color */
+      color: #fff;
+      /* Text color for pressed buttons */
+    }
+
+    .state-button {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* Style for pressed flow buttons */
+    .state-button.selected {
+      background-color: #e2c74d;
+      /* Change to your preferred color */
+      color: #fff;
+      /* Text color for pressed buttons */
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>
+      <span id="title"><span class="blue-box">Grade</span><span class="bold-text"> Hub </span></span>
+      <button id="logout-button"><a href="/">🔒</a></button>
+      <span id="user-greeting">Hello,<span id="student-name"></span>!</span>
+    </h1>
+  </header>
+  <div class="tile">
+    <ul>
+      <li><img src="../static/GHlogo.png" alt="GradeHub_Logo"></li>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/add_friends">Add Friends <ba id="circleContainer"></ba> </a></li>
+      <li><a href="/change_courses">Change my Courses</a></li>
+      <li><a href="/my_grades">My Grades</a></li>
+      <li><a href="/my_active_courses">My Active Courses</a></li>
+      <li><a href="/my_friends">My Friends</a></li>
+      <li><a href="/september">September</a></li>
+    </ul>
+  </div>
+
+  <div class="container">
+    <h2>My Grades</h2>
+    <li>For Failed courses: "Fail"</li>
+    <li>For Passed courses without grade: "Pass"</li>
+    <li>For Future courses: "X"</li>
+
+
+    <br>
+
+    <div id="state-buttons">
+      Κατάσταση: Επιλογή φίλτρων
+      <p></p>
+      <button class="state-button" data-state="1">My Courses</button>
+      <button class="state-button" data-state="2">My Old Courses</button>
+      <button class="state-button" data-state="3">My Future Courses</button>
+      <button class="state-button" data-state="4">My Failed Courses</button>
+      <br>
+    </div>
+
+
+    <div id="semester-buttons">
+      Εξάμηνα: Επιλογή φίλτρων<br>
+      <p></p>
+      <button class="semester-button" data-semester="1">1</button>
+      <button class="semester-button" data-semester="2">2</button>
+      <button class="semester-button" data-semester="3">3</button>
+      <button class="semester-button" data-semester="4">4</button>
+      <button class="semester-button" data-semester="5">5</button>
+      <button class="semester-button" data-semester="6">6</button>
+      <button class="semester-button" data-semester="7">7</button>
+      <button class="semester-button" data-semester="8">8</button>
+      <button class="semester-button" data-semester="9">9</button>
+      <br>
+    </div>
+
+    <div id="flow-buttons" hidden>
+      Ροές: Επιλογή φίλτρων<br>
+      <p></p>
+      <button class="flow-button" data-flow="K">Κ</button>
+      <button class="flow-button" data-flow="Υ">Υ</button>
+      <button class="flow-button" data-flow="Λ">Λ</button>
+      <button class="flow-button" data-flow="Η">Η</button>
+      <button class="flow-button" data-flow="Δ">Δ</button>
+      <button class="flow-button" data-flow="Τ">Τ</button>
+      <button class="flow-button" data-flow="Σ">Σ</button>
+      <button class="flow-button" data-flow="Ζ">Ζ</button>
+      <button class="flow-button" data-flow="Ε">Ε</button>
+      <button class="flow-button" data-flow="Ο">Ο</button>
+      <button class="flow-button" data-flow="Ι">Ι</button>
+      <button class="flow-button" data-flow="Φ">Φ</button>
+      <button class="flow-button" data-flow="Μ">Μ</button>
+      <button class="flow-button" data-flow="Ν">Ν</button>
+      <button class="flow-button" data-flow="A">Α</button>
+
+    </div>
+
+
+
+    <div id="label_school_1" hidden>
+      <p>
+        (Κ) : Κορμού<br>
+        Ροή Υ: Υπολογιστικά Συστήματα<br>
+        Ροή Λ: Λογισμικό Η/Υ<br>
+        Ροή Η: Ηλεκτρονική-Κυκλώματα-Υλικά<br>
+        Ροή Δ: Επικοινωνίες και Δίκτυα Υπολογιστών<br>
+        Ροή Τ: Κύματα και Τηλεπικοινωνίες<br>
+        Ροή Σ: Σήματα, Έλεγχος και Ρομποτική<br>
+        Ροή Ζ: Ηλεκτρομηχανική Μετατροπή Ενέργειας, Υψηλές Τάσεις και Εγκαταστάσεις<br>
+        Ροή Ε: Συστήματα Ηλεκτρικής Ενέργειας<br>
+        Ροή Ο: Διοίκηση και Απόφαση<br>
+        Ροή Ι: Βιοϊατρική<br>
+        Ροή Φ: Φυσική<br>
+        Ροή Μ: Μαθηματικά<br>
+        (N): Μη Εντασσόμενα στις Ροές<br>
+        (A): Ανθρωπιστικά<br>
+      </p>
+    </div>
+
+    <div id="label_school_3" hidden>
+      <p>
+        (Κ) : Κορμου<br>
+        (Ε) : Επικοινωνίες<br>
+        (Τ) : Τεχνολογία της Πληροφορίας<br>
+        (Δ) : Εξυπνα Δικτυα με Απε-Υψηλες Τασεις<br>
+        (Ζ) : Μετατροπη Ενεργειας-Ηλεκτρονικα Ισχυος-Ηλεκτροτεχνικα Υλικα-Ηπιες Μορφες Ενεργειας<br>
+        (Λ) : Υπολογιστες: Λογισμικο και Υλικο<br>
+        (Η) : Ηλεκτρονικη και Ενσωματωμενα Συστηματα<br>
+        (Σ) : Συστηματα, Ελεγχος και Ρομποτικη<br>
+        (Υ) : Κυβερνοφυσικα Συστηματα<br>
+      </p>
+    </div>
+
+    <div id="label_school_4" hidden>
+      <p>
+        (Κ) : Κορμου<br>
+        (Υ) : Τομέας Υδραυλικής και Τεχνικής Περιβάλλοντος (TYTΠ)<br>
+        (Ε) : Τομέας Eπιστήμης & Tεχνολογίας των Kατασκευών (TETK)<br>
+        (Μ) : Τομέας Γεωτεχνικής Μηχανικής (ΤΓΜ)<br>
+        (Δ) : Τομέας Μεταφορών και Διαχείρισης Έργων (ΤοΜεΔΕ)<br>
+        (Τ) : Δομοστατικός Τομέας (ΔΤΜ)<br>
+
+      </p>
+    </div>
+
+
+
+    <div id="course-container"></div>
+
+
+
+  </div>
+  <script>
+    // Retrieve student data from localStorage
+    try {
+      const studentData = JSON.parse(localStorage.getItem('user'));
+    } catch {
+      window.location.href = "/";
+    }
+    const studentData = JSON.parse(localStorage.getItem('user'));
+
+    var flowButtonsDiv = document.getElementById("flow-buttons");
+    var label1 = document.getElementById("label_school_1");
+    var label3 = document.getElementById("label_school_3");
+    var label4 = document.getElementById("label_school_4");
+
+    // Check the condition and toggle the 'hidden' attribute accordingly
+    if (studentData.school === 1) {
+      label1.removeAttribute("hidden");
+    } else {
+      label1.setAttribute("hidden", "true");
+    }
+
+
+    // Check the condition and toggle the 'hidden' attribute accordingly
+    if (studentData.school === 3) {
+      label3.removeAttribute("hidden");
+    } else {
+      label3.setAttribute("hidden", "true");
+    }
+
+    // Check the condition and toggle the 'hidden' attribute accordingly
+    if (studentData.school === 4) {
+      label4.removeAttribute("hidden");
+    } else {
+      label4.setAttribute("hidden", "true");
+    }
+
+
+
+    // Check the condition and toggle the 'hidden' attribute accordingly
+    if (studentData.school === 1 || studentData.school === 3 || studentData.school === 4) {
+      flowButtonsDiv.removeAttribute("hidden");
+    } else {
+      flowButtonsDiv.setAttribute("hidden", "true");
+    }
+
+    document.getElementById('student-name').textContent = studentData.name;
+
+    async function fetchCourses(semesters, flows, states) {
+      try {
+        let list_of_flows, list_of_semesters, list_of_states;
+
+        if (semesters.length === 0) {
+          list_of_semesters = ""
+        } else {
+          list_of_semesters = semesters.join(',');
+        }
+
+
+        if (flows.length === 0) {
+          list_of_flows = ""
+        } else {
+          list_of_flows = flows.join(',');
+        }
+
+        if (states.length === 0) {
+          list_of_states = ""
+        }
+        else {
+          list_of_states = states.join(',');
+        }
+        const response = await fetch(`http://localhost:5500/filtered_courses/${studentData.school}/${studentData.student_id}?semesters=${list_of_semesters}&flows=${list_of_flows}&states=${list_of_states}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const coursesData = await response.json();
+        return coursesData;
+      } catch (error) {
+        console.error('Error fetching course info:', error);
+        return null;
+      }
+    }
+
+
+
+
+    async function fetchAvgCourse(course_id) {
+      try {
+        const response = await fetch(`http://localhost:5500/course_avg/${course_id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const studentsData = await response.json();
+
+        return studentsData;
+      } catch (error) {
+        console.error(`Error fetching course's avg:`, error);
+        return null;
+      }
+    }
+
+    async function fetchConfirmation() {
+      try {
+        const response = await fetch(`http://localhost:5500/confirmation/${studentData.username}/${studentData.password}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const studentsData = await response.json();
+
+        return studentsData;
+      } catch (error) {
+        console.error('Error fetching student info:', error);
+        return null;
+      }
+    }
+    async function security() {
+      const get_me = await fetchConfirmation(studentData.username, studentData.password);
+      if (get_me[0] === undefined) {
+        window.location.href = '/'; // Redirect to '/landing'
+      }
+    }
+
+    let hasCodeExecuted = false;
+    function runOnce() {
+      if (!hasCodeExecuted) {
+        hasCodeExecuted = true;
+        security();
+      }
+    }
+    document.addEventListener("DOMContentLoaded", runOnce);
+    // Filter courses by flow when a flow button is clicked
+
+    const flowButtons = document.querySelectorAll('.flow-button');
+    flowButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        //const selectedFlow = button.getAttribute('data-flow');
+        const isSelected = button.classList.contains('selected');
+
+        // Toggle the selected state
+        if (isSelected) {
+          button.classList.remove('selected');
+        } else {
+          button.classList.add('selected');
+        }
+
+        // Get all selected flows
+        const selectedFlows = Array.from(flowButtons).filter((btn) => btn.classList.contains('selected')).map((btn) => btn.getAttribute('data-flow'));
+        const selectedSemesters = Array.from(document.querySelectorAll('.semester-button.selected')).map((btn) => btn.getAttribute('data-semester'));
+        const selectedStates = Array.from(document.querySelectorAll('.state-button.selected')).map((btn) => btn.getAttribute('data-state'));
+
+        localStorage.setItem('selectedFlows', JSON.stringify(selectedFlows));
+        localStorage.setItem('selectedSemesters', JSON.stringify(selectedSemesters));
+        localStorage.setItem('selectedStates_grades', JSON.stringify(selectedStates));
+
+        filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
+      });
+    });
+
+
+
+    // Filter courses by flow when a flow button is clicked
+    const semesterButtons = document.querySelectorAll('.semester-button');
+    semesterButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        //const selectedSemester = button.getAttribute('data-semester');
+        const isSelected = button.classList.contains('selected');
+
+        // Toggle the selected state
+        if (isSelected) {
+          button.classList.remove('selected');
+        } else {
+          button.classList.add('selected');
+        }
+
+        // Get all selected semesters
+        const selectedSemesters = Array.from(semesterButtons).filter((btn) => btn.classList.contains('selected')).map((btn) => btn.getAttribute('data-semester'));
+        const selectedFlows = Array.from(document.querySelectorAll('.flow-button.selected')).map((btn) => btn.getAttribute('data-flow'));
+        const selectedStates = Array.from(document.querySelectorAll('.state-button.selected')).map((btn) => btn.getAttribute('data-state'));
+
+
+        localStorage.setItem('selectedFlows', JSON.stringify(selectedFlows));
+        localStorage.setItem('selectedSemesters', JSON.stringify(selectedSemesters));
+        localStorage.setItem('selectedStates_grades', JSON.stringify(selectedStates));
+        filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
+      });
+    });
+
+    const stateButtons = document.querySelectorAll('.state-button');
+    stateButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const isSelected = button.classList.contains('selected');
+
+        // Toggle the selected state
+        if (isSelected) {
+          button.classList.remove('selected');
+        } else {
+          button.classList.add('selected');
+        }
+
+
+
+        // Get all selected flows
+        const selectedStates = Array.from(stateButtons).filter((btn) => btn.classList.contains('selected')).map((btn) => btn.getAttribute('data-state'));
+        const selectedSemesters = Array.from(document.querySelectorAll('.semester-button.selected')).map((btn) => btn.getAttribute('data-semester'));
+        const selectedFlows = Array.from(document.querySelectorAll('.flow-button.selected')).map((btn) => btn.getAttribute('data-flow'));
+
+
+        localStorage.setItem('selectedFlows', JSON.stringify(selectedFlows));
+        localStorage.setItem('selectedSemesters', JSON.stringify(selectedSemesters));
+        localStorage.setItem('selectedStates_grades', JSON.stringify(selectedStates));
+        filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
+      });
+    });
+
+    // Function to get saved selected flows from localStorage
+    function getSavedSelectedFlows() {
+      const savedSelectedFlows = localStorage.getItem('selectedFlows');
+      return savedSelectedFlows ? JSON.parse(savedSelectedFlows) : [];
+    }
+
+    // Function to get saved selected semesters from localStorage
+    function getSavedSelectedSemesters() {
+      const savedSelectedSemesters = localStorage.getItem('selectedSemesters');
+      return savedSelectedSemesters ? JSON.parse(savedSelectedSemesters) : [];
+    }
+
+
+    // Function to get saved selected semesters from localStorage
+    function getSavedSelectedStates() {
+      const savedSelectedStates = localStorage.getItem('selectedStates_grades');
+      return savedSelectedStates ? JSON.parse(savedSelectedStates) : [];
+    }
+
+
+    // Initialize the course display with saved or all flows
+    let savedSelectedFlows;
+    if (studentData.school == 1 || studentData.school == 3 || studentData.school == 4)
+      savedSelectedFlows = getSavedSelectedFlows();
+    else
+      savedSelectedFlows = [];
+
+    const savedSelectedSemesters = getSavedSelectedSemesters();
+    const savedSelectedStates = getSavedSelectedStates();
+
+
+    if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 0 && savedSelectedStates == 0) {
+      filterCoursesBySemesterFlowState([], [], [1, 2, 3, 4]);
+    }
+    else {
+      if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 0 && savedSelectedStates == 1) {
+        filterCoursesBySemesterFlowState([], [], savedSelectedStates);
+
+      }
+      else {
+        if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 1 && savedSelectedStates == 0) {
+          filterCoursesBySemesterFlowState([], savedSelectedFlows, [1, 2, 3, 4]);
+
+        }
+        else {
+          if (savedSelectedSemesters.length == 0 && savedSelectedFlows.length == 1 && savedSelectedStates == 1) {
+            filterCoursesBySemesterFlowState([], savedSelectedFlows, savedSelectedStates);
+          }
+          else {
+
+            if (savedSelectedSemesters.length == 1 && savedSelectedFlows.length == 0 && savedSelectedStates == 0) {
+              filterCoursesBySemesterFlowState(savedSelectedSemesters, [], [1, 2, 3, 4]);
+
+            }
+            else {
+
+              if (savedSelectedSemesters.length == 1 && savedSelectedFlows.length == 0 && savedSelectedStates == 1) {
+                filterCoursesBySemesterFlowState(savedSelectedSemesters, [], savedSelectedStates);
+
+              }
+              else {
+
+                if (savedSelectedSemesters.length == 1 && savedSelectedFlows.length == 1 && savedSelectedStates == 0) {
+                  filterCoursesBySemesterFlowState(savedSelectedSemesters, savedSelectedFlows, [1, 2, 3, 4]);
+
+                }
+                else {
+                  filterCoursesBySemesterFlowState(savedSelectedSemesters, savedSelectedFlows, savedSelectedStates);
+
+
+                }
+              }
+            }
+          }
+
+        }
+      }
+    }
+
+
+    if (savedSelectedFlows.length > 0) {
+      savedSelectedFlows.forEach((flow) => {
+        const button = document.querySelector(`[data-flow="${flow}"]`);
+        if (button) {
+          button.classList.add('selected');
+        }
+      });
+    }
+
+    if (savedSelectedSemesters.length > 0) {
+      savedSelectedSemesters.forEach((semester) => {
+        const button = document.querySelector(`[data-semester="${semester}"]`);
+        if (button) {
+          button.classList.add('selected');
+        }
+      });
+    }
+
+    if (savedSelectedStates.length > 0) {
+      savedSelectedStates.forEach((state) => {
+        const button = document.querySelector(`[data-state="${state}"]`);
+        if (button) {
+          button.classList.add('selected');
+        }
+      });
+    }
+
+    // Add a new event listener to handle both semester and flow buttons
+    const filterButtons = document.querySelectorAll('.semester-button, .flow-button');
+    filterButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const selectedSemesters = Array.from(document.querySelectorAll('.semester-button.selected')).map((btn) => btn.getAttribute('data-semester'));
+        const selectedFlows = Array.from(document.querySelectorAll('.flow-button.selected')).map((btn) => btn.getAttribute('data-flow'));
+        const selectedStates = Array.from(document.querySelectorAll('.state-button.selected')).map((btn) => btn.getAttribute('data-state'));
+
+        if (studentData.school == 1 || studentData.school == 3 || studentData.school == 4) {
+          if (selectedStates.length === 0)
+            filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, [1, 2, 3, 4]);
+          else
+            filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates);
+
+        }
+        else {
+          if (selectedStates.length === 0)
+            filterCoursesBySemesterFlowState(selectedSemesters, [], [1, 2, 3, 4]);
+          else
+            filterCoursesBySemesterFlowState(selectedSemesters, [], selectedStates);
+
+        }
+      });
+    });
+
+    // Create a function to display the "zero results" table
+    function displayZeroResultsTable() {
+      const courseContainer = document.querySelector('#course-container');
+      courseContainer.innerHTML = ''; // Clear existing courses
+
+      const zeroResultsTable = document.createElement('table');
+      const zeroResultsRow = document.createElement('tr');
+      const zeroResultsCell = document.createElement('td');
+
+
+      // Apply CSS styles to center the message horizontally and vertically
+      zeroResultsTable.style.width = '100%'; // Make the table width 100% of its parent container
+      zeroResultsTable.style.display = 'flex';
+      zeroResultsTable.style.alignItems = 'center';
+      zeroResultsTable.style.justifyContent = 'center';
+      zeroResultsTable.style.paddingTop = '20px';
+
+      zeroResultsCell.style.backgroundColor = 'lightgreen'; // Choose your desired background color
+      zeroResultsCell.style.padding = '20px'; // Add some padding for spacing
+      zeroResultsCell.style.textAlign = 'center';
+
+
+
+      zeroResultsCell.textContent = 'Oh no, zero results based on your filters or zero active courses';
+      zeroResultsRow.appendChild(zeroResultsCell);
+      zeroResultsTable.appendChild(zeroResultsRow);
+
+      courseContainer.appendChild(zeroResultsTable);
+    }
+
+    async function filterCoursesBySemesterFlowState(selectedSemesters, selectedFlows, selectedStates) {
+
+      let restriction = true;
+      let states_corrected;
+      if (selectedStates.length === 0) {
+        states_corrected = [1, 2, 3, 4]
+      } else {
+        states_corrected = selectedStates
+      }
+      const courses = await fetchCourses(selectedSemesters, selectedFlows, states_corrected);
+      if (courses && courses.length > 0) {
+        const courseContainer = document.querySelector('#course-container');
+        courseContainer.innerHTML = ''; // Clear existing courses
+
+        let currentSemester = 0;
+        let currentTable = null;
+        courses.forEach((course) => {
+          if (course.grade != undefined) {
+
+            restriction = false;
+
+
+            if (course.semester !== currentSemester) {
+              currentSemester = course.semester;
+
+              // Create a heading for the semester
+              const semesterHeading = document.createElement('h3');
+              semesterHeading.textContent = `Semester ${currentSemester}`;
+              courseContainer.appendChild(semesterHeading);
+
+              // Create a table for the courses in the semester
+              currentTable = document.createElement('table');
+              courseContainer.appendChild(currentTable);
+
+              // Create table header
+              const tableHeader = document.createElement('tr');
+              const headers = ['Name', 'Grade', 'Actions']; // Added 'Actions' header
+
+              headers.forEach((headerText) => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                tableHeader.appendChild(th);
+              });
+
+              currentTable.appendChild(tableHeader);
+            }
+
+            // Create table row for the course
+            const row = document.createElement('tr');
+
+
+            const nameCell = document.createElement('td');
+            const courseName = course.name; // Store the course name
+
+            // Create a tooltip container
+            const tooltipContainer = document.createElement('div');
+            tooltipContainer.classList.add('tooltip-container');
+
+            // Create a span to hold the course name
+            const courseNameSpan = document.createElement('span');
+            courseNameSpan.textContent = courseName;
+            tooltipContainer.appendChild(courseNameSpan);
+
+            // Add a mouseover event listener to fetch and display the average
+            tooltipContainer.addEventListener('mouseover', async () => {
+              const avg = await fetchAvgCourse(course.course_id);
+              if (avg && avg.length > 0 && avg[0].avg) {
+                const average = avg[0].avg;
+                const tooltip = document.createElement('span');
+                tooltip.textContent = `Average: ${average}`;
+                tooltip.classList.add('tooltip');
+                tooltipContainer.appendChild(tooltip);
+              }
+            });
+
+            // Append the tooltip container to the name cell
+            nameCell.appendChild(tooltipContainer);
+            row.appendChild(nameCell);
+
+
+            const gradeCell = document.createElement('td');
+            const gradeInput = document.createElement('input'); // Input field for editing
+            gradeInput.type = 'text';
+            gradeInput.value = course.grade;
+            gradeInput.style.width = '50px'; // Apply smaller width directly to the input element
+            gradeCell.appendChild(gradeInput);
+            gradeCell.style.width = '50px';
+            row.appendChild(gradeCell);
+
+            const actionsCell = document.createElement('td');
+            const updateButton = document.createElement('button'); // Button for updating grade
+            updateButton.textContent = 'Update';
+            actionsCell.style.width = '50px';
+
+            updateButton.addEventListener('click', async () => {
+              const newGrade = gradeInput.value;
+
+
+              // Check if newGrade is a number
+              if (!isNaN(newGrade)) {
+                await sendGrade(studentData.student_id, course.course_id, newGrade, course.name);
+              }
+              // Check if newGrade is "Fail" or "Pass" (case insensitive)
+              else if (newGrade.toLowerCase() === 'fail' || newGrade.toLowerCase() === 'pass') {
+                const newestGrade = newGrade.charAt(0).toUpperCase() + newGrade.slice(1).toLowerCase();
+                await sendGrade(studentData.student_id, course.course_id, newestGrade, course.name);
+
+              }
+              // Check if newGrade is the letter "X" (case insensitive)
+              else if (newGrade.toLowerCase() === 'x') {
+                await sendGrade(studentData.student_id, course.course_id, "X", course.name);
+              }
+              // If none of the above conditions match
+              else {
+                reload_me(getScrollPosition());
+
+              }
+
+
+            });
+            actionsCell.appendChild(updateButton);
+            row.appendChild(actionsCell);
+
+            // Check if the grade is below 5 or "Fail" and apply the red row color
+            if (course.grade < 5 || course.grade === "Fail" || course.grade === "FAIL") {
+              row.classList.add('red-row');
+            } else {
+              row.classList.add('default-course-movi');
+
+            }
+
+            currentTable.appendChild(row);
+
+          }
+        });
+      } else {
+        displayZeroResultsTable();
+      }
+
+      if (restriction) {
+        displayZeroResultsTable();
+      }
+    }
+
+    // Function to send the grade to the server
+    async function sendGrade(studentId, courseId, grade, name) {
+      try {
+        const response = await fetch(`http://localhost:5500/change_grade/${studentId}/${courseId}/${grade}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        // Handle the response as needed
+        console.log('Grade submitted for ', courseId);
+        reload_me(getScrollPosition());
+      } catch (error) {
+        console.error('Error submitting grade:', error);
+      }
+    }
+
+    async function fetchFriends() {
+      try {
+        const response = await fetch(`http://localhost:5500/list_friends/${studentData.student_id}`, {
+          method: 'GET',
+          credentials: 'include', // Include cookies in the request
+        });
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching students data:', error);
+        return null;
+      }
+    }
+    // Display pending friend requests
+    async function HowManyPending() {
+      const friendsData = await fetchFriends();
+      let counter = 0;
+      if (friendsData) {
+
+        friendsData.forEach(friend => {
+          if (friend.status === 'pending' && friend.receiver_id === studentData.student_id) {
+            counter += 1;
+          }
+        });
+      }
+      return counter;
+    }
+    async function HowManyPendingCircle() {
+      const NumPending = await HowManyPending();
+      if (NumPending != 0) {
+        const circleElement = document.createElement('ba');
+        circleElement.classList.add('circle');
+        circleElement.innerText = NumPending;
+        const containerElement = document.getElementById('circleContainer');
+        containerElement.appendChild(circleElement);
+      }
+      else {
+        const containerElement = document.getElementById('circleContainer');
+        containerElement.innerHTML = ''; // Clear the container if NumPending is zero
+        return; // Exit the function  }
+      }
+    }
+    HowManyPendingCircle();
+
+
+
+
+    function getScrollPosition() {
+      return {
+        x: window.scrollX || window.pageXOffset,
+        y: window.scrollY || window.pageYOffset
+      };
+    }
+    function reload_me(positions) {
+      localStorage.setItem("location_mygrades", JSON.stringify(positions));
+      location.reload();
+    }
+    function scrollToPosition(x, y) {
+      setTimeout(function () {
+        window.scrollTo(x, y);
+      }, 200); // 500 milliseconds (0.5 seconds) delay
+    }
+    //try {
+    const location_return = JSON.parse(localStorage.getItem('location_mygrades'));
+    //} catch (error) {
+    scrollToPosition(location_return.x, location_return.y);
+    //}
+
+
+
+  </script>
+
+</body>
+
+</html>
