@@ -49,7 +49,7 @@ GradeHub supports courses from the following faculties:
 ## Online Version
 
 An online version of this website is already running using dynamic DNS and can be accessed at the following URL:
-[GradeHub Online Version](http://gradehub.hopto.org:8800/)
+[GradeHub Online Version](http://uniportal.sytes.net:8800/)
 
 
 ![GradeHub Langing Page](./images/landing.png)
@@ -60,7 +60,6 @@ An online version of this website is already running using dynamic DNS and can b
 
 ![GradeHub Admin Page](./images/admin.png)
 ![GradeHub Add Friends Page](./images/add_friends.png)
-![GradeHub My Friends Page](./images/my_friends.png)
 
 
 ![GradeHub September Page](./images/september.png)
